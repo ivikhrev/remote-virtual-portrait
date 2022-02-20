@@ -1,0 +1,4 @@
+numpy>=1.19.5
+opencv-python==4.5.*
+openvino-dev==2022.1.0.dev20220215
+scikit-image>=0.15
