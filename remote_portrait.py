@@ -1,16 +1,14 @@
 import logging as log
-import os
 import sys
 from time import perf_counter
 
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 
-import numpy as np
 import cv2
 import openvino.runtime as ov
 
-import models
-import utils
+from remote_portrait import models
+from remote_portrait import meshes
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -39,6 +37,7 @@ def build_argparser():
 
     return parser
 
+
 def main():
     args = build_argparser().parse_args()
     start_time = perf_counter()
@@ -55,8 +54,10 @@ def main():
     parameters = flame_encoder(img)
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
-    utils.save_obj(args.output, result_dict, args.template)
+    meshes.save_obj(args.output, result_dict, args.template)
     end_time = perf_counter()
     log.info(f"Total time: { (end_time - start_time) * 1e3 :.1f} ms")
+
+
 if __name__ == '__main__':
     sys.exit(main() or 0)

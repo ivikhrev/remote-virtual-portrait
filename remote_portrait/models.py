@@ -1,11 +1,12 @@
-import numpy as np
-import cv2
-import openvino.runtime as ov
-from skimage.transform import warp, estimate_transform
 from abc import ABC, abstractmethod
-import utils
+import numpy as np
+from skimage.transform import warp, estimate_transform
+import cv2
+
+from . import utils
 
 import logging as log
+
 
 class Model(ABC):
     def __init__(self, core, model_path, device):
