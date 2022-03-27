@@ -1,5 +1,34 @@
 import numpy as np
 import logging as log
+import cv2
+
+class Detection:
+    def __init__(self, xmin, ymin, xmax, ymax, score, id):
+        self.xmin = xmin
+        self.ymin = ymin
+        self.xmax = xmax
+        self.ymax = ymax
+        self.score = score
+        self.id = id
+
+    def bottom_left_point(self):
+        return self.xmin, self.ymin
+
+    def top_right_point(self):
+        return self.xmax, self.ymax
+
+    def get_coords(self):
+        return self.xmin, self.ymin, self.xmax, self.ymax
+
+
+def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
+    if not keep_aspect_ratio:
+        resized_frame = cv2.resize(image, size, interpolation=interpolation)
+    else:
+        h, w = image.shape[:2]
+        scale = min(size[1] / h, size[0] / w)
+        resized_frame = cv2.resize(image, None, fx=scale, fy=scale, interpolation=interpolation)
+    return resized_frame
 
 
 def log_model_info(model):
@@ -23,3 +52,28 @@ def batch_orth_proj(X, camera):
     shape = X_trans.shape
     Xn = (camera[:, :, 0:1] * X_trans)
     return Xn
+
+
+def nms(x1, y1, x2, y2, scores, thresh, keep_top_k=None):
+    areas = (x2 - x1) * (y2 - y1)
+    order = scores.argsort()[::-1]
+    if keep_top_k:
+        order = order[:keep_top_k]
+    keep = []
+    while order.size > 0:
+        i = order[0]
+        keep.append(i)
+        xx1 = np.maximum(x1[i], x1[order[1:]])
+        yy1 = np.maximum(y1[i], y1[order[1:]])
+        xx2 = np.minimum(x2[i], x2[order[1:]])
+        yy2 = np.minimum(y2[i], y2[order[1:]])
+
+        w = np.maximum(0.0, xx2 - xx1)
+        h = np.maximum(0.0, yy2 - yy1)
+        intersection = w * h
+
+        union = (areas[i] + areas[order[1:]] - intersection)
+        overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
+        order = order[np.where(overlap <= thresh)[0] + 1]
+
+    return keep

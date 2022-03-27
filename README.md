@@ -10,6 +10,16 @@ python -m venv remote-portrait
 .\remote-portrait\Scripts\activate
 pip install -r requirements.txt
 ```
+
+# Download models
+
+In activated environment:
+
+```
+omz_downloader.exe --name retinaface-resnet50-pytorch
+omz_converter.exe --name retinaface-resnet50-pytorch
+```
+
 # Running
 
 Run the application with the next command line:
