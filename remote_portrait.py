@@ -46,42 +46,53 @@ def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1, offset_x = 0, of
     dy = int(h * coeffy / 2)
     return (xmin - dx + offset_x, ymin - dy + offset_y), (xmax +  dx + offset_x, ymax + dy + offset_y)
 
+
+def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
+    h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
+
+    if h > w:
+        offset = h - w
+        crop = img[bottom_left_point[1] : top_right_point[1], bottom_left_point[0]
+            - offset // 2:top_right_point[0] + offset // 2]
+    else:
+        offset = w - h
+        crop = img[bottom_left_point[1] - offset // 2:top_right_point[1]
+            + offset // 2, bottom_left_point[0]:top_right_point[0]]
+
+    return cv2.resize(crop, dsize=(target_size, target_size))
+
+
 def main():
     args = build_argparser().parse_args()
     start_time = perf_counter()
     log.info(f"Reading image {args.input}")
-    img = cv2.imread(args.input) # TODO: crop face using face detector as done in original repo
+    img = cv2.imread(args.input)
 
     core = ov.Core()
-    log.info(20*'-' + 'Initialize models' + 20*'-')
+    log.info(20*'-' + 'Crop face from image' + 20*'-')
     face_model = models.UltraLightFace(core, args.model_face_detector, args.device)
     detections = face_model(img)
-    print(len(detections))
-    for d in detections:
-        print(d.bottom_left_point(), d.top_right_point())
-        print(d.score)
-        bottom_left, top_right = adjust_rect(d.xmin, d.ymin, d.xmax, d.ymax, 0.4, 0.35,  0, -20)
-        cv2.rectangle(img,  bottom_left, top_right, (255,0,0), 2)
-        h, w = top_right[1] - bottom_left[1], top_right[0] - bottom_left[0]
-        print(h, w)
-        if h > w: # h > w
-            offset = h - w
-            print(bottom_left[0] - offset // 2, top_right[0] + offset // 2, bottom_left[1], top_right[1])
-            cv2.imshow("test2", img[bottom_left[1] : top_right[1], bottom_left[0] - offset // 2:top_right[0] + offset // 2]) # h x w
-            crop = img[bottom_left[1] : top_right[1], bottom_left[0] - offset // 2:top_right[0] + offset // 2]
-        else:
-            offset = w - h
-            cv2.imshow("test2", img[bottom_left[1] - offset // 2:top_right[1] + offset // 2, bottom_left[0]:top_right[0]])
-        cv2.waitKey(0)
-    cv2.imshow("test", img)
+
+    if len(detections) == 0:
+        raise RuntimeError("No face detected!")
+    elif len(detections) > 1:
+        raise RuntimeError("More than 1 face detected! Please provide image with 1 face only!")
+    face = detections[0]
+
+    bottom_left, top_right = adjust_rect(face.xmin, face.ymin,
+        face.xmax, face.ymax, 0.4, 0.35, 0, -20)
+
+    cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
+    cv2.imshow("test", cropped_face)
     cv2.waitKey(0)
-    img = cv2.resize(crop, dsize=(224, 224))
+
+    log.info(20*'-' + 'Initialize models' + 20*'-')
     flame_model_params_num = {'shape' : 100, 'tex' : 50, 'exp' : 50, 'pose' : 6, 'cam' : 3, 'light' : 27}
     flame_encoder = models.FlameEncoder(core, args.model_encoder, args.device)
     flame = models.Flame(core, args.model_flame, args.device, flame_model_params_num)
 
     log.info(20*'-' + 'Encoding input image' + 20*'-')
-    parameters = flame_encoder(img)
+    parameters = flame_encoder(cropped_face)
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
     meshes.save_obj(args.output, result_dict, args.template)

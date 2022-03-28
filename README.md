@@ -11,13 +11,13 @@ python -m venv remote-portrait
 pip install -r requirements.txt
 ```
 
-# Download models
+# Download and convert face detection models
 
 In activated environment:
 
 ```
-omz_downloader.exe --name retinaface-resnet50-pytorch
-omz_converter.exe --name retinaface-resnet50-pytorch
+omz_downloader.exe --name ultra-lightweight-face-detection-rfb-320
+omz_converter.exe --name ultra-lightweight-face-detection-rfb-320
 ```
 
 # Running
