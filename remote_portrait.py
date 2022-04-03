@@ -7,8 +7,8 @@ from argparse import ArgumentParser
 import cv2
 import openvino.runtime as ov
 
-from remote_portrait import models
-from remote_portrait import meshes
+from remote_portrait import models, meshes, visualizer
+
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -67,7 +67,8 @@ def main():
     start_time = perf_counter()
     log.info(f"Reading image {args.input}")
     img = cv2.imread(args.input)
-
+    if img is None:
+        raise ValueError(f"Can't read image {args.input}")
     core = ov.Core()
     log.info(20*'-' + 'Crop face from image' + 20*'-')
     face_model = models.UltraLightFace(core, args.model_face_detector, args.device)
@@ -83,8 +84,8 @@ def main():
         face.xmax, face.ymax, 0.4, 0.35, 0, -20)
 
     cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
-    cv2.imshow("test", cropped_face)
-    cv2.waitKey(0)
+    # cv2.imshow("test", cropped_face)
+    # cv2.waitKey(1)
 
     log.info(20*'-' + 'Initialize models' + 20*'-')
     flame_model_params_num = {'shape' : 100, 'tex' : 50, 'exp' : 50, 'pose' : 6, 'cam' : 3, 'light' : 27}
@@ -96,6 +97,7 @@ def main():
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
     meshes.save_obj(args.output, result_dict, args.template)
+    visualizer.visualize(args.output)
     end_time = perf_counter()
     log.info(f"Total time: { (end_time - start_time) * 1e3 :.1f} ms")
 

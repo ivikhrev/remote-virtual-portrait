@@ -25,7 +25,7 @@ omz_converter.exe --name ultra-lightweight-face-detection-rfb-320
 Run the application with the next command line:
 
 ```
-python remote_portrait.py -i test_data/test.png -m_en models_ir/encoder_flame/E_flame.xml -m_flame models_ir/flame/flame.xml --template resources/head_template.obj
+python remote_portrait.py -i test_data/test.png -m_fd ultra-lightweight-face-detection-rfb-320.xml -m_en models_ir/encoder_flame/E_flame.xml -m_flame models_ir/flame/flame.xml --template resources/head_template.obj
 ```
 
 # Output
