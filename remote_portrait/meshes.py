@@ -1,8 +1,11 @@
+import logging
 import os
+
 import cv2
 import numpy as np
 
-import logging as log
+
+log = logging.getLogger('Global log')
 
 
 def tensor2image(tensor):

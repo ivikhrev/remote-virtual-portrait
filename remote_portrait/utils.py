@@ -1,6 +1,10 @@
+import logging
 import numpy as np
-import logging as log
 import cv2
+
+
+log = logging.getLogger('Global log')
+
 
 class Detection:
     def __init__(self, xmin, ymin, xmax, ymax, score, id):

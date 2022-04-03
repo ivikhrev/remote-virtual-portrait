@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 import numpy as np
 from skimage.transform import warp, estimate_transform
@@ -5,7 +6,8 @@ import cv2
 
 from .utils import Detection, batch_orth_proj, log_model_info, nms, resize_image
 
-import logging as log
+
+log = logging.getLogger('Global log')
 
 
 class Model(ABC):

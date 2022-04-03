@@ -1,4 +1,4 @@
-import logging as log
+import logging
 import sys
 from time import perf_counter
 
@@ -7,10 +7,16 @@ from argparse import ArgumentParser
 import cv2
 import openvino.runtime as ov
 
-from remote_portrait import models, meshes, visualizer
+from remote_portrait import models, meshes
+from remote_portrait.visualizer import Visualizer
 
 
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+log = logging.getLogger('Global log')
+log_handler = logging.StreamHandler()
+log.addHandler(log_handler)
+log.setLevel(logging.DEBUG)
+log_handler.setLevel(logging.DEBUG)
+log_handler.setFormatter(logging.Formatter('[ %(levelname)s ] %(message)s'))
 
 
 def build_argparser():
@@ -84,8 +90,8 @@ def main():
         face.xmax, face.ymax, 0.4, 0.35, 0, -20)
 
     cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
-    # cv2.imshow("test", cropped_face)
-    # cv2.waitKey(1)
+    if not args.no_show:
+        cv2.imshow("cropped face", cropped_face)
 
     log.info(20*'-' + 'Initialize models' + 20*'-')
     flame_model_params_num = {'shape' : 100, 'tex' : 50, 'exp' : 50, 'pose' : 6, 'cam' : 3, 'light' : 27}
@@ -97,7 +103,8 @@ def main():
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
     meshes.save_obj(args.output, result_dict, args.template)
-    visualizer.visualize(args.output)
+    visualizer = Visualizer(800, 600, args.output, not args.no_show)
+    visualizer.run()
     end_time = perf_counter()
     log.info(f"Total time: { (end_time - start_time) * 1e3 :.1f} ms")
 
