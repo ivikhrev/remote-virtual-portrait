@@ -18,11 +18,6 @@ jobs:
 
       - name: Run application
         run: |
-          python remote_portrait.py -h
+          python3 remote_portrait.py -h
         working-directory: .
 
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: output
-          path: output.log
