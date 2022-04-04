@@ -19,8 +19,3 @@ jobs:
           python3 -m pylint --recursive=y ./remote_portrait
         working-directory: .
 
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: pylint_out
-          path: pylint_out.log
