@@ -1,0 +1,27 @@
+name: Code Style
+on: [push, pull_request]
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install pylint
+        run: |
+          sudo apt update
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pylint
+      - name: Run pylint
+        if: failure()
+        run: |
+          pylint --recursive=y .\remote_portrait\
+        working-directory: .
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: pylint_out
+          path: pylint_out.log
