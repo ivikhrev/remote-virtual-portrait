@@ -1,0 +1,27 @@
+name: Code Style
+on: [push, pull_request]
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+      - name: Run
+        if: failure()
+        run: |
+          python remote_portrait.py -h
+        working-directory: .
+
+      # - uses: actions/upload-artifact@v2
+      #   if: failure()
+      #   with:
+      #     name: pylint_out
+      #     path: pylint_out.log
