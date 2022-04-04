@@ -65,7 +65,8 @@ def write_obj(obj_name,
                 f.write('v {} {} {}\n'.format(vertices[i, 0], vertices[i, 1], vertices[i, 2]))
         else:
             for i in range(vertices.shape[0]):
-                f.write('v {} {} {} {} {} {}\n'.format(vertices[i, 0], vertices[i, 1], vertices[i, 2], colors[i, 0], colors[i, 1], colors[i, 2]))
+                f.write('v {} {} {} {} {} {}\n'.format(vertices[i, 0], vertices[i, 1],
+                    vertices[i, 2], colors[i, 0], colors[i, 1], colors[i, 2]))
 
         # # write uv coords
         if texture is None:
@@ -132,7 +133,8 @@ def save_obj(obj_filename, opdict, template_path):
     # texture = texture[:,:,[2,1,0]]
     # normals = opdict['normals'][i].cpu().numpy()
     # displacement_map = opdict['displacement_map'][i].cpu().numpy().squeeze()
-    # dense_vertices, dense_colors, dense_faces = util.upsample_mesh(vertices, normals, faces, displacement_map, texture, self.dense_template)
+    # dense_vertices, dense_colors, dense_faces = util.upsample_mesh(vertices, normals,
+    #   faces, displacement_map, texture, self.dense_template)
     # util.write_obj(filename.replace('.obj', '_detail.obj'),
     #                 dense_vertices,
     #                 dense_faces,
@@ -141,7 +143,8 @@ def save_obj(obj_filename, opdict, template_path):
 
 
 def load_obj(obj_filename):
-    """ Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
+    """
+    Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
     Load a mesh from a file-like object.
     """
     with open(obj_filename, 'r') as f:
