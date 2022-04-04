@@ -16,13 +16,12 @@ jobs:
           python3 -m pip install -r requirements.txt
 
       - name: Run
-        if: failure()
         run: |
           python remote_portrait.py -h
         working-directory: .
 
-      # - uses: actions/upload-artifact@v2
-      #   if: failure()
-      #   with:
-      #     name: pylint_out
-      #     path: pylint_out.log
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: output
+          path: output.log
