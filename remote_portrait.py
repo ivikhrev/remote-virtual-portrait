@@ -1,23 +1,29 @@
-import logging as log
-import os
+import logging
 import sys
 from time import perf_counter
 
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 
-import numpy as np
 import cv2
 import openvino.runtime as ov
 
-import models
-import utils
+from remote_portrait import models, meshes
+from remote_portrait.visualizer import Visualizer
 
-log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+
+log = logging.getLogger('Global log')
+log_handler = logging.StreamHandler()
+log.addHandler(log_handler)
+log.setLevel(logging.DEBUG)
+log_handler.setLevel(logging.DEBUG)
+log_handler.setFormatter(logging.Formatter('[ %(levelname)s ] %(message)s'))
 
 
 def build_argparser():
     parser = ArgumentParser()
     args = parser.add_argument_group('Options')
+    args.add_argument('-m_fd', '--model_face_detector', required=True,
+                      help='Required. Path to an .xml file with a trained face detection model.')
     args.add_argument('-m_en', '--model_encoder', required=True,
                       help='Required. Path to an .xml file with a trained flame model.')
     args.add_argument('-m_flame', '--model_flame', required=True,
@@ -39,24 +45,69 @@ def build_argparser():
 
     return parser
 
+
+def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1, offset_x = 0, offset_y = 0):
+    h , w =  ymax - ymin, xmax - xmin
+    dx = int(w * coeffx / 2)
+    dy = int(h * coeffy / 2)
+    return (xmin - dx + offset_x, ymin - dy + offset_y), (xmax +  dx + offset_x, ymax + dy + offset_y)
+
+
+def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
+    h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
+
+    if h > w:
+        offset = h - w
+        crop = img[bottom_left_point[1] : top_right_point[1], bottom_left_point[0]
+            - offset // 2:top_right_point[0] + offset // 2]
+    else:
+        offset = w - h
+        crop = img[bottom_left_point[1] - offset // 2:top_right_point[1]
+            + offset // 2, bottom_left_point[0]:top_right_point[0]]
+
+    return cv2.resize(crop, dsize=(target_size, target_size))
+
+
 def main():
     args = build_argparser().parse_args()
     start_time = perf_counter()
     log.info(f"Reading image {args.input}")
-    img = cv2.imread(args.input) # TODO: crop face using face detector as done in original repo
-
+    img = cv2.imread(args.input)
+    if img is None:
+        raise ValueError(f"Can't read image {args.input}")
     core = ov.Core()
+    log.info(20*'-' + 'Crop face from image' + 20*'-')
+    face_model = models.UltraLightFace(core, args.model_face_detector, args.device)
+    detections = face_model(img)
+
+    if len(detections) == 0:
+        raise RuntimeError("No face detected!")
+    elif len(detections) > 1:
+        raise RuntimeError("More than 1 face detected! Please provide image with 1 face only!")
+    face = detections[0]
+
+    bottom_left, top_right = adjust_rect(face.xmin, face.ymin,
+        face.xmax, face.ymax, 0.4, 0.35, 0, -20)
+
+    cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
+    if not args.no_show:
+        cv2.imshow("cropped face", cropped_face)
+
     log.info(20*'-' + 'Initialize models' + 20*'-')
     flame_model_params_num = {'shape' : 100, 'tex' : 50, 'exp' : 50, 'pose' : 6, 'cam' : 3, 'light' : 27}
     flame_encoder = models.FlameEncoder(core, args.model_encoder, args.device)
     flame = models.Flame(core, args.model_flame, args.device, flame_model_params_num)
 
     log.info(20*'-' + 'Encoding input image' + 20*'-')
-    parameters = flame_encoder(img)
+    parameters = flame_encoder(cropped_face)
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
-    utils.save_obj(args.output, result_dict, args.template)
+    meshes.save_obj(args.output, result_dict, args.template)
+    visualizer = Visualizer(800, 600, args.output, not args.no_show)
+    visualizer.run()
     end_time = perf_counter()
     log.info(f"Total time: { (end_time - start_time) * 1e3 :.1f} ms")
+
+
 if __name__ == '__main__':
     sys.exit(main() or 0)

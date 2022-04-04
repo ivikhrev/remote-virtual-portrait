@@ -1,18 +1,21 @@
-import numpy as np
-import cv2
-import openvino.runtime as ov
-from skimage.transform import warp, estimate_transform
+import logging
 from abc import ABC, abstractmethod
-import utils
+import numpy as np
+from skimage.transform import warp, estimate_transform
+import cv2
 
-import logging as log
+from .utils import Detection, batch_orth_proj, log_model_info, nms, resize_image
+
+
+log = logging.getLogger('Global log')
+
 
 class Model(ABC):
     def __init__(self, core, model_path, device):
         self.core = core
         log.info(f"Reading model {model_path}")
         self.model = core.read_model(model_path)
-        utils.log_model_info(self.model)
+        log_model_info(self.model)
         log.info(f"Loading model {model_path} to the {device} device")
         self.compiled_model = core.compile_model(self.model, device)
         self.req = self.compiled_model.create_infer_request()
@@ -38,6 +41,62 @@ class Model(ABC):
         input_dict = self.preprocess(input)
         output_dict = self.infer(input_dict)
         return self.postrocess(output_dict)
+
+
+class UltraLightFace(Model):
+    def __init__(self, core, model_path, device, conf_t=0.5, iou_t=0.5):
+        super().__init__(core, model_path, device)
+        self.image_blob_name = self.input_names[0]
+        self.n, self.c, self.h, self.w = self.model.input().get_shape()
+        self.scores_tensor_name = self.output_names[0]
+        self.bboxes_tensor_name = self.output_names[1]
+        self.confidence_threshold = conf_t
+        self.iou_threshold = iou_t
+
+    def preprocess(self, image):
+        self.original_shape = image.shape
+        resized_image = resize_image(image, (self.w, self.h))
+        self.resized_shape = resized_image.shape
+        resized_image = resized_image.transpose((2, 0, 1))  # HWC->CHW
+        resized_image = resized_image.reshape((1, self.c, self.h, self.w))
+        return  {self.image_blob_name : resized_image}
+
+    def postrocess(self, output_dict):
+        boxes = output_dict[self.bboxes_tensor_name][0]
+        scores = output_dict[self.scores_tensor_name][0]
+
+        score = np.transpose(scores)[1]
+
+        mask = score > self.confidence_threshold
+        filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+
+        x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
+
+        keep = nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.iou_threshold)
+
+        filtered_score = filtered_score[keep]
+        x_mins, y_mins, x_maxs, y_maxs = x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep]
+        detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
+        detections = UltraLightFace.resize_detections(detections, self.original_shape[1::-1])
+        return UltraLightFace.clip_detections(detections, self.original_shape)
+
+    @staticmethod
+    def resize_detections(detections, original_image_size):
+        for detection in detections:
+            detection.xmin *= original_image_size[0]
+            detection.xmax *= original_image_size[0]
+            detection.ymin *= original_image_size[1]
+            detection.ymax *= original_image_size[1]
+        return detections
+
+    @staticmethod
+    def clip_detections(detections, size):
+        for detection in detections:
+            detection.xmin = max(int(detection.xmin), 0)
+            detection.ymin = max(int(detection.ymin), 0)
+            detection.xmax = min(int(detection.xmax), size[1])
+            detection.ymax = min(int(detection.ymax), size[0])
+        return detections
 
 
 class FlameEncoder(Model):
@@ -80,13 +139,13 @@ class Flame(Model):
         landmarks3d_world = landmarks3d.copy()
 
         # projection
-        landmarks2d = utils.batch_orth_proj(landmarks2d, self.codes['cam'])[:,:,:2];
+        landmarks2d = batch_orth_proj(landmarks2d, self.codes['cam'])[:,:,:2];
         landmarks2d[:,:,1:] = -landmarks2d[:,:,1:]
 
-        landmarks3d = utils.batch_orth_proj(landmarks3d, self.codes['cam'])
+        landmarks3d = batch_orth_proj(landmarks3d, self.codes['cam'])
         landmarks3d[:,:,1:] = -landmarks3d[:,:,1:]
 
-        trans_verts = utils.batch_orth_proj(vertices, self.codes['cam'])
+        trans_verts = batch_orth_proj(vertices, self.codes['cam'])
         trans_verts[:,:,1:] = -trans_verts[:,:,1:]
 
         opdict = {

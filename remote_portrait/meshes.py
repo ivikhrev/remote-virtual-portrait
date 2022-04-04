@@ -1,29 +1,11 @@
+import logging
 import os
-import numpy as np
+
 import cv2
-import logging as log
-
-def log_model_info(model):
-    log.info(f"Model name: {model.get_name()}")
-    log.info("Inputs:")
-    for input_ in model.inputs:
-        log.info(f"\t{input_.get_any_name()} : shape {input_.shape}")
-    log.info("Outputs:")
-    for output_ in model.outputs:
-        log.info(f"\t{output_.get_any_name()} : shape {output_.shape}")
+import numpy as np
 
 
-def batch_orth_proj(X, camera):
-    ''' orthgraphic projection
-        X:  3d vertices, [bz, n_point, 3]
-        camera: scale and translation, [bz, 3], [scale, tx, ty]
-    '''
-    camera = camera.copy().reshape((-1, 1, 3))
-    X_trans = X[:, :, :2] + camera[:, :, 1:]
-    X_trans = np.concatenate([X_trans, X[:,:,2:]], axis=2)
-    shape = X_trans.shape
-    Xn = (camera[:, :, 0:1] * X_trans)
-    return Xn
+log = logging.getLogger('Global log')
 
 
 def tensor2image(tensor):
@@ -83,7 +65,8 @@ def write_obj(obj_name,
                 f.write('v {} {} {}\n'.format(vertices[i, 0], vertices[i, 1], vertices[i, 2]))
         else:
             for i in range(vertices.shape[0]):
-                f.write('v {} {} {} {} {} {}\n'.format(vertices[i, 0], vertices[i, 1], vertices[i, 2], colors[i, 0], colors[i, 1], colors[i, 2]))
+                f.write('v {} {} {} {} {} {}\n'.format(vertices[i, 0], vertices[i, 1],
+                    vertices[i, 2], colors[i, 0], colors[i, 1], colors[i, 2]))
 
         # # write uv coords
         if texture is None:
@@ -150,7 +133,8 @@ def save_obj(obj_filename, opdict, template_path):
     # texture = texture[:,:,[2,1,0]]
     # normals = opdict['normals'][i].cpu().numpy()
     # displacement_map = opdict['displacement_map'][i].cpu().numpy().squeeze()
-    # dense_vertices, dense_colors, dense_faces = util.upsample_mesh(vertices, normals, faces, displacement_map, texture, self.dense_template)
+    # dense_vertices, dense_colors, dense_faces = util.upsample_mesh(vertices, normals,
+    #   faces, displacement_map, texture, self.dense_template)
     # util.write_obj(filename.replace('.obj', '_detail.obj'),
     #                 dense_vertices,
     #                 dense_faces,
@@ -159,7 +143,8 @@ def save_obj(obj_filename, opdict, template_path):
 
 
 def load_obj(obj_filename):
-    """ Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
+    """
+    Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
     Load a mesh from a file-like object.
     """
     with open(obj_filename, 'r') as f:
