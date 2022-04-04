@@ -1,8 +1,8 @@
-name: Code Style
+name: Test run
 on: [push, pull_request]
 
 jobs:
-  clang-format:
+  application-run:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -12,10 +12,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
+          sudo apt-get install python3-setuptools
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
 
-      - name: Run
+      - name: Run application
         run: |
           python remote_portrait.py -h
         working-directory: .
