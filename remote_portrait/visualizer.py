@@ -21,7 +21,7 @@ class Visualizer(pyglet.window.Window):
         self.show = show
         self.x, self.y, self.z = 0, 0, -1
         self.rot_x, self.rot_y = 0, 0
-        self.res_img_name = mesh_obj_filename.split('.')[0] + '_img.png'
+        self.res_img_name = mesh_obj_filename.split('.')[0] + '.png'
         self.is_running = True
         self.meshes = pywavefront.Wavefront(mesh_obj_filename)
 

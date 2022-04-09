@@ -15,7 +15,7 @@ jobs:
           sudo apt-get install python3-setuptools
           sudo apt-get install freeglut-devel
           python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
+          python3 -m pip install -r ./requirements.txt
 
       - name: Prepare to run
         run: |
@@ -24,6 +24,19 @@ jobs:
 
       - name: Run application
         run: |
-          python3 remote_portrait.py -h
+          python3 remote_portrait.py \
+            -i ./test_data/test2.png \
+            -m_fd ./public/ultra-lightweight-face-detection-rfb-320/FP32/ultra-lightweight-face-detection-rfb-320.xml \
+            -m_en ./models_ir/encoder_flame/E_flame.xml \
+            -m_flame ./models_ir/flame/flame.xml \
+            --template ./resources/head_template.obj \
+            -o res.obj \
+            --no_show
         working-directory: .
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: res.obj
+          path: res.obj
+          name: res.png
+          path: res.png
