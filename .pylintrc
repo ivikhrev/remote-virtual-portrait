@@ -1,2 +1,15 @@
 [BASIC]
+disable = C0103,
+          C0114,
+          C0115,
+          C0116,
+          E1101,
+          W0201,
+          W1203,
+          arguments-renamed,
+          too-many-arguments,
+          too-many-instance-attributes,
+          too-many-locals,
+
 max-line-length=120
+ignore-docstrings = yes

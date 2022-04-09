@@ -20,10 +20,10 @@ class Model(ABC):
         self.compiled_model = core.compile_model(self.model, device)
         self.req = self.compiled_model.create_infer_request()
         self.input_names = [input_.get_any_name() for input_ in self.model.inputs]
-        self.output_names = [output.get_any_name() for output in self.model.outputs]
+        self.output_names = [output_.get_any_name() for output_ in self.model.outputs]
 
     @abstractmethod
-    def preprocess(self, input):
+    def preprocess(self, model_input):
         raise NotImplementedError("Base abstract class method must be overriden!")
 
     @abstractmethod
@@ -37,8 +37,8 @@ class Model(ABC):
             output_dict[out_tensor.get_any_name()] = output[out_tensor]
         return output_dict
 
-    def __call__(self, input):
-        input_dict = self.preprocess(input)
+    def __call__(self, model_input):
+        input_dict = self.preprocess(model_input)
         output_dict = self.infer(input_dict)
         return self.postrocess(output_dict)
 
@@ -100,9 +100,6 @@ class UltraLightFace(Model):
 
 
 class FlameEncoder(Model):
-    def __init__(self, core, model_path, device):
-        super().__init__(core, model_path, device)
-
     def preprocess(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image / 255.
@@ -125,8 +122,8 @@ class Flame(Model):
         super().__init__(core, model_path, device)
         self.params = parameters
 
-    def preprocess(self, input):
-        self.codes = self.decompose_code(input, self.params)
+    def preprocess(self, model_input):
+        self.codes = self.decompose_code(model_input, self.params)
         return { self.input_names[0] : self.codes['shape'],
                  self.input_names[1] : self.codes['exp'],
                  self.input_names[2] : self.codes['pose'] }
@@ -139,7 +136,7 @@ class Flame(Model):
         landmarks3d_world = landmarks3d.copy()
 
         # projection
-        landmarks2d = batch_orth_proj(landmarks2d, self.codes['cam'])[:,:,:2];
+        landmarks2d = batch_orth_proj(landmarks2d, self.codes['cam'])[:,:,:2]
         landmarks2d[:,:,1:] = -landmarks2d[:,:,1:]
 
         landmarks3d = batch_orth_proj(landmarks3d, self.codes['cam'])

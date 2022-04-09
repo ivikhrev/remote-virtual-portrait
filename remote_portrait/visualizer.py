@@ -1,10 +1,10 @@
-import ctypes
 import logging
 
 import pyglet
-from pyglet.gl import *
+from pyglet import gl
 import pywavefront
 from pywavefront import visualization
+
 
 log = logging.getLogger('Global log')
 
@@ -14,9 +14,10 @@ pywavefront.configure_logging(
 )
 
 
+#pylint: disable=W0223
 class Visualizer(pyglet.window.Window):
     def __init__ (self, width, height, mesh_obj_filename, show=True):
-        super(Visualizer, self).__init__(width=width, height=height, visible=show, fullscreen = False)
+        super().__init__(width=width, height=height, visible=show, fullscreen=False)
         self.show = show
         self.x, self.y, self.z = 0, 0, -1
         self.rot_x, self.rot_y = 0, 0
@@ -25,10 +26,10 @@ class Visualizer(pyglet.window.Window):
         self.meshes = pywavefront.Wavefront(mesh_obj_filename)
 
     def on_resize(self, width, height):
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(30., float(width)/height, 0.01, 100.)
-        glMatrixMode(GL_MODELVIEW)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        gl.gluPerspective(30., float(width)/height, 0.01, 100.)
+        gl.glMatrixMode(gl.GL_MODELVIEW)
         return True
 
     def on_draw(self):
@@ -36,20 +37,20 @@ class Visualizer(pyglet.window.Window):
 
     def render(self):
         self.clear()
-        glLoadIdentity()
-        glEnable(GL_LIGHTING)
-        glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat*4)(5, 5, 5, 1))
-        glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat*4)(0, 0, 0, 1))
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat*4)(1, 1, 1, 1))
-        glEnable(GL_LIGHT0)
+        gl.glLoadIdentity()
+        gl.glEnable(gl.GL_LIGHTING)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (gl.GLfloat*4)(5, 5, 5, 1))
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, (gl.GLfloat*4)(0, 0, 0, 1))
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, (gl.GLfloat*4)(1, 1, 1, 1))
+        gl.glEnable(gl.GL_LIGHT0)
 
-        glEnable(GL_COLOR_MATERIAL)
-        glEnable(GL_DEPTH_TEST)
-        glShadeModel(GL_SMOOTH)
+        gl.glEnable(gl.GL_COLOR_MATERIAL)
+        gl.glEnable(gl.GL_DEPTH_TEST)
+        gl.glShadeModel(gl.GL_SMOOTH)
 
-        glTranslatef(self.x, self.y, self.z)
-        glRotatef(self.rot_y, 1, 0, 0)
-        glRotatef(self.rot_x, 0, 1, 0)
+        gl.glTranslatef(self.x, self.y, self.z)
+        gl.glRotatef(self.rot_y, 1, 0, 0)
+        gl.glRotatef(self.rot_x, 0, 1, 0)
         pywavefront.visualization.draw(self.meshes)
 
     def on_close(self):

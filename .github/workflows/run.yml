@@ -17,6 +17,11 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
 
+      - name: Prepare to run
+        run: |
+          omz_downloader --name ultra-lightweight-face-detection-rfb-320
+          omz_converter --name ultra-lightweight-face-detection-rfb-320
+
       - name: Run application
         run: |
           python3 remote_portrait.py -h
