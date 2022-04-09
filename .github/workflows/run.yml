@@ -26,7 +26,7 @@ jobs:
         run: |
           export DISPLAY=:0
           python3 remote_portrait.py \
-            -i ./test_data/test2.png \
+            -i ./test_data/test.png \
             -m_fd ./public/ultra-lightweight-face-detection-rfb-320/FP32/ultra-lightweight-face-detection-rfb-320.xml \
             -m_en ./models_ir/encoder_flame/E_flame.xml \
             -m_flame ./models_ir/flame/flame.xml \
