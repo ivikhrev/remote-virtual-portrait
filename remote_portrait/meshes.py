@@ -144,7 +144,8 @@ def save_obj(obj_filename, opdict, template_path):
 
 def load_obj(obj_filename):
     """
-    Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
+    Ref:
+    https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
     Load a mesh from a file-like object.
     """
     with open(obj_filename, 'r') as f:
