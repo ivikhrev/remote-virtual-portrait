@@ -7,13 +7,13 @@ log = logging.getLogger('Global log')
 
 
 class Detection:
-    def __init__(self, xmin, ymin, xmax, ymax, score, id):
+    def __init__(self, xmin, ymin, xmax, ymax, score, class_id):
         self.xmin = xmin
         self.ymin = ymin
         self.xmax = xmax
         self.ymax = ymax
         self.score = score
-        self.id = id
+        self.id = class_id
 
     def bottom_left_point(self):
         return self.xmin, self.ymin
@@ -53,7 +53,7 @@ def batch_orth_proj(X, camera):
     camera = camera.copy().reshape((-1, 1, 3))
     X_trans = X[:, :, :2] + camera[:, :, 1:]
     X_trans = np.concatenate([X_trans, X[:,:,2:]], axis=2)
-    shape = X_trans.shape
+    #shape = X_trans.shape
     Xn = (camera[:, :, 0:1] * X_trans)
     return Xn
 

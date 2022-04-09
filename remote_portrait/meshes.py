@@ -1,7 +1,6 @@
 import logging
 import os
 
-import cv2
 import numpy as np
 
 
@@ -20,10 +19,10 @@ def write_obj(obj_name,
               faces,
               colors=None,
               texture=None,
-              uvcoords=None,
-              uvfaces=None,
-              inverse_face_order=False,
-              normal_map=None,
+              uvcoords=None,  # pylint: disable=W0613
+              uvfaces=None,  # pylint: disable=W0613
+              inverse_face_order=False,  # pylint: disable=W0613
+              normal_map=None,  # pylint: disable=W0613
               ):
     ''' Save 3D face model with texture.
     Ref: https://github.com/patrikhuber/eos/blob/bd00155ebae4b1a13b08bf5a991694d682abbada/include/eos/core/Mesh.hpp
@@ -50,28 +49,29 @@ def write_obj(obj_name,
     #         uvfaces = uvfaces[:, [2, 1, 0]]
 
     # write obj
-    log.info(f"Saving resulted .obj file: {obj_name}")
-    with open(obj_name, 'w') as f:
+    log.info(f"Saving resulted .obj file : {obj_name}")
+    with open(obj_name, 'w') as obj_file:  # pylint: disable=W1514
         # first line: write mtlib(material library)
-        # f.write('# %s\n' % os.path.basename(obj_name))
-        # f.write('#\n')
-        # f.write('\n')
+        # obj_file.write('# %s\n' % os.path.basename(obj_name))
+        # obj_file.write('#\n')
+        # obj_file.write('\n')
         # if texture is not None:
-        #     f.write('mtllib %s\n\n' % os.path.basename(mtl_name))
+        #     obj_file.write('mtllib %s\n\n' % os.path.basename(mtl_name))
 
         # write vertices
         if colors is None:
             for i in range(vertices.shape[0]):
-                f.write('v {} {} {}\n'.format(vertices[i, 0], vertices[i, 1], vertices[i, 2]))
+                obj_file.write(f'v {vertices[i, 0]} {vertices[i, 1]} {vertices[i, 2]}\n')
         else:
             for i in range(vertices.shape[0]):
-                f.write('v {} {} {} {} {} {}\n'.format(vertices[i, 0], vertices[i, 1],
-                    vertices[i, 2], colors[i, 0], colors[i, 1], colors[i, 2]))
+                obj_file.write(
+                    f'v {vertices[i, 0]} {vertices[i, 1]} {vertices[i, 2]} '
+                        f'{vertices[i, 3]} {vertices[i, 4]} {vertices[i, 5]}\n')
 
         # # write uv coords
         if texture is None:
             for i in range(faces.shape[0]):
-                f.write('f {} {} {}\n'.format(faces[i, 2], faces[i, 1], faces[i, 0]))
+                obj_file.write(f'f {faces[i, 2]} {faces[i, 1]} {faces[i, 0]}\n')
         # else:
         #     for i in range(uvcoords.shape[0]):
         #         f.write('vt {} {}\n'.format(uvcoords[i,0], uvcoords[i,1]))
@@ -117,7 +117,8 @@ def save_obj(obj_filename, opdict, template_path):
     '''
     i = 0
     vertices = opdict['verts'][i]
-    verts, uvcoords, faces, uvfaces= load_obj(template_path)
+    #verts, uvcoords, faces, uvfaces= load_obj(template_path)
+    _, _, faces, _= load_obj(template_path)
     faces = faces[None, ...][0]
     # texture = tensor2image(opdict['uv_texture_gt'][i])
     # uvcoords = self.render.raw_uvcoords[0]
@@ -144,11 +145,12 @@ def save_obj(obj_filename, opdict, template_path):
 
 def load_obj(obj_filename):
     """
-    Ref: https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
+    Ref:
+    https://github.com/facebookresearch/pytorch3d/blob/25c065e9dafa90163e7cec873dbb324a637c68b7/pytorch3d/io/obj_io.py
     Load a mesh from a file-like object.
     """
-    with open(obj_filename, 'r') as f:
-        lines = [line.strip() for line in f]
+    with open(obj_filename, 'r') as obj_file:  # pylint: disable=W1514
+        lines = [line.strip() for line in obj_file]
 
     verts, uvcoords = [], []
     faces, uv_faces = [], []
@@ -168,9 +170,7 @@ def load_obj(obj_filename):
         elif line.startswith("vt "):  # Line is a texture.
             tx = [float(x) for x in tokens[1:3]]
             if len(tx) != 2:
-                raise ValueError(
-                    "Texture %s does not have 2 values. Line: %s" % (str(tx), str(line))
-                )
+                raise ValueError(f"Texture {tx} does not have 2 values. Line: {line}")
             uvcoords.append(tx)
         elif line.startswith("f "):  # Line is a face.
             # Update face properties info.

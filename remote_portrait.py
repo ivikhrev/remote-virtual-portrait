@@ -6,9 +6,7 @@ from argparse import ArgumentParser
 
 import cv2
 import openvino.runtime as ov
-
-from remote_portrait import models, meshes
-from remote_portrait.visualizer import Visualizer
+from pyglet.canvas import get_display
 
 
 log = logging.getLogger('Global log')
@@ -17,6 +15,20 @@ log.addHandler(log_handler)
 log.setLevel(logging.DEBUG)
 log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(logging.Formatter('[ %(levelname)s ] %(message)s'))
+
+
+try:
+    log.info("Trying to get display...")
+    display = get_display()
+    log.info("Successfully")
+except Exception:
+    log.info("Can't get physical display. Create virtual one.")
+    from pyvirtualdisplay import Display
+    virtual_display = Display(visible=0, size=(1920, 1080))
+    virtual_display.start()
+
+from remote_portrait import models, meshes
+from remote_portrait.visualizer import Visualizer
 
 
 def build_argparser():
