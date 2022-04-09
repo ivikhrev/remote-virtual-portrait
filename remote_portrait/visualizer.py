@@ -3,7 +3,7 @@ import logging
 import pyglet
 from pyglet import gl
 import pywavefront
-from pywavefront import visualization
+from pywavefront import visualization  # pylint: disable=W0611
 
 
 log = logging.getLogger('Global log')
@@ -14,7 +14,8 @@ pywavefront.configure_logging(
 )
 
 
-#pylint: disable=W0223
+
+# pylint: disable=W0223
 class Visualizer(pyglet.window.Window):
     def __init__ (self, width, height, mesh_obj_filename, show=True):
         super().__init__(width=width, height=height, visible=show, fullscreen=False)
@@ -25,7 +26,7 @@ class Visualizer(pyglet.window.Window):
         self.is_running = True
         self.meshes = pywavefront.Wavefront(mesh_obj_filename)
 
-    def on_resize(self, width, height):
+    def on_resize(self, width, height):  # pylint: disable=R0201
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         gl.gluPerspective(30., float(width)/height, 0.01, 100.)
@@ -56,18 +57,18 @@ class Visualizer(pyglet.window.Window):
     def on_close(self):
         self.is_running = False
 
-    def on_key_press(self, symbol, modifiers):
+    def on_key_press(self, symbol, modifiers):  # pylint: disable=W0613
         if symbol ==  pyglet.window.key.S:
             pyglet.image.get_buffer_manager().get_color_buffer().save(self.res_img_name)
         if symbol == pyglet.window.key.ESCAPE:
             self.is_running = False
 
-    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):  # pylint: disable=W0613
         if buttons & pyglet.window.mouse.LEFT:
             self.rot_y += dy
             self.rot_x += dx
 
-    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):  # pylint: disable=W0613
         self.z += 0.1 * scroll_y
 
     def run(self):
