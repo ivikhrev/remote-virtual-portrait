@@ -40,7 +40,7 @@ def write_obj(obj_name,
     # texture_name = obj_name.replace('.obj', '.png')
     # material_name = 'FaceTexture'
 
-    faces = faces.copy()
+    #faces = faces.copy()
     # mesh lab start with 1, python/c++ start from 0
     faces += 1
     # if inverse_face_order:
@@ -49,7 +49,6 @@ def write_obj(obj_name,
     #         uvfaces = uvfaces[:, [2, 1, 0]]
 
     # write obj
-    log.info(f"Saving resulted .obj file : {obj_name}")
     with open(obj_name, 'w') as obj_file:  # pylint: disable=W1514
         # first line: write mtlib(material library)
         # obj_file.write('# %s\n' % os.path.basename(obj_name))
@@ -68,10 +67,19 @@ def write_obj(obj_name,
                     f'v {vertices[i, 0]} {vertices[i, 1]} {vertices[i, 2]} '
                         f'{vertices[i, 3]} {vertices[i, 4]} {vertices[i, 5]}\n')
 
+        for i in range(faces.shape[0]):
+            v1 = vertices[faces[i, 2] - 1]
+            v2 = vertices[faces[i, 1] - 1]
+            v3 = vertices[faces[i, 0] - 1]
+            cross_product = np.cross(v2 - v3, v1 - v3)
+            normal = cross_product / np.linalg.norm(cross_product)
+            obj_file.write('vn {} {} {}\n'.format(*normal))  # pylint: disable=C0209
+
         # # write uv coords
         if texture is None:
             for i in range(faces.shape[0]):
-                obj_file.write(f'f {faces[i, 2]} {faces[i, 1]} {faces[i, 0]}\n')
+                obj_file.write(f'f {faces[i, 0]}//{i + 1} {faces[i, 1]}//{i + 1} {faces[i, 2]}//{i + 1}\n')
+    log.info(f"Saved resulted .obj file : {obj_name}")
         # else:
         #     for i in range(uvcoords.shape[0]):
         #         f.write('vt {} {}\n'.format(uvcoords[i,0], uvcoords[i,1]))
