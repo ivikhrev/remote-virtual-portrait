@@ -1,11 +1,12 @@
 import logging
-import sys
 from time import perf_counter
+import sys
 
 from argparse import ArgumentParser
 
 import cv2
 import openvino.runtime as ov
+import numpy as np
 from pyglet.canvas import get_display
 
 
@@ -66,6 +67,11 @@ def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1, offset_x = 0, of
 
 
 def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
+    orig_h, orig_w, _ = img.shape
+    print(orig_h, orig_w)
+    bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w), np.clip(bottom_left_point[1], 0, orig_h))
+    top_right_point = (np.clip(top_right_point[0], 0, orig_w), np.clip(top_right_point[1], 0, orig_h))
+
     h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
 
     if h > w:
@@ -76,7 +82,6 @@ def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
         offset = w - h
         crop = img[bottom_left_point[1] - offset // 2:top_right_point[1]
             + offset // 2, bottom_left_point[0]:top_right_point[0]]
-
     return cv2.resize(crop, dsize=(target_size, target_size))
 
 

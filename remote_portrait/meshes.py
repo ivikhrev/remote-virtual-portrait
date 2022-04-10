@@ -49,7 +49,6 @@ def write_obj(obj_name,
     #         uvfaces = uvfaces[:, [2, 1, 0]]
 
     # write obj
-    log.info(f"Saving resulted .obj file : {obj_name}")
     with open(obj_name, 'w') as obj_file:  # pylint: disable=W1514
         # first line: write mtlib(material library)
         # obj_file.write('# %s\n' % os.path.basename(obj_name))
@@ -80,6 +79,7 @@ def write_obj(obj_name,
         if texture is None:
             for i in range(faces.shape[0]):
                 obj_file.write(f'f {faces[i, 0]}//{i + 1} {faces[i, 1]}//{i + 1} {faces[i, 2]}//{i + 1}\n')
+    log.info(f"Saved resulted .obj file : {obj_name}")
         # else:
         #     for i in range(uvcoords.shape[0]):
         #         f.write('vt {} {}\n'.format(uvcoords[i,0], uvcoords[i,1]))
