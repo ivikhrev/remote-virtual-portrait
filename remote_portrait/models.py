@@ -100,6 +100,15 @@ class UltraLightFace(Model):
 
 
 class FlameEncoder(Model):
+    def __init__(self, core, model_path, device):
+        super().__init__(core, model_path, device)
+        self.params_num = {'shape' : 100,
+                            'tex' : 50,
+                            'exp' : 50,
+                            'pose' : 6,
+                            'cam' : 3,
+                            'light' : 27}
+
     def preprocess(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image / 255.
@@ -114,16 +123,27 @@ class FlameEncoder(Model):
         return {self.input_names[0] : input_tensor}
 
     def postrocess(self, output_dict):
-        return output_dict[self.output_names[0]]
+        return FlameEncoder.decompose_code(output_dict[self.output_names[0]], self.params_num)
+
+    @staticmethod
+    def decompose_code(code, params_num):
+        ''' Convert a flattened parameter vector to a dictionary of parameters
+        code_dict.keys() = ['shape', 'tex', 'exp', 'pose', 'cam', 'light']
+        '''
+        code_dict = {}
+        start = 0
+        for key in params_num:
+            end = start + params_num[key]
+            code_dict[key] = code[:, start:end]
+            start = end
+            if key == 'light':
+                code_dict[key] = code_dict[key].reshape(code_dict[key].shape[0], 9, 3)
+        return code_dict
 
 
 class Flame(Model):
-    def __init__(self, core, model_path, device, parameters):
-        super().__init__(core, model_path, device)
-        self.params = parameters
-
     def preprocess(self, model_input):
-        self.codes = self.decompose_code(model_input, self.params)
+        self.codes = model_input
         return { self.input_names[0] : self.codes['shape'],
                  self.input_names[1] : self.codes['exp'],
                  self.input_names[2] : self.codes['pose'] }
@@ -154,17 +174,15 @@ class Flame(Model):
         }
         return opdict
 
-    @staticmethod
-    def decompose_code(code, params_num):
-        ''' Convert a flattened parameter vector to a dictionary of parameters
-        code_dict.keys() = ['shape', 'tex', 'exp', 'pose', 'cam', 'light']
-        '''
-        code_dict = {}
-        start = 0
-        for key in params_num:
-            end = start + params_num[key]
-            code_dict[key] = code[:, start:end]
-            start = end
-            if key == 'light':
-                code_dict[key] = code_dict[key].reshape(code_dict[key].shape[0], 9, 3)
-        return code_dict
+
+class FlameTexture(Model):
+    def __init__(self, core, model_path, device, tex_params):
+        super().__init__(core, model_path, device)
+        self.tex_params = tex_params
+
+    def preprocess(self, model_input):
+        self.codes = self.decompose_code(model_input, self.params)
+        return { self.input_names[0] : self.codes}
+
+    def postrocess(self, output_dict):
+        """"""

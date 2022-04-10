@@ -41,6 +41,8 @@ def build_argparser():
                       help='Required. Path to an .xml file with a trained flame model.')
     args.add_argument('-m_flame', '--model_flame', required=True,
                       help='Required. Path to an .xml file with a trained flame model.')
+    args.add_argument('-m_tex', '--model_texture', required=True,
+                      help='Required. Path to an .xml file with a trained texture model.')
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, or camera id.')
     args.add_argument('--template', required=True,
@@ -68,7 +70,6 @@ def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1, offset_x = 0, of
 
 def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
     orig_h, orig_w, _ = img.shape
-    print(orig_h, orig_w)
     bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w), np.clip(bottom_left_point[1], 0, orig_h))
     top_right_point = (np.clip(top_right_point[0], 0, orig_w), np.clip(top_right_point[1], 0, orig_h))
 
@@ -111,9 +112,8 @@ def main():
         cv2.imshow("cropped face", cropped_face)
 
     log.info(20*'-' + 'Initialize models' + 20*'-')
-    flame_model_params_num = {'shape' : 100, 'tex' : 50, 'exp' : 50, 'pose' : 6, 'cam' : 3, 'light' : 27}
     flame_encoder = models.FlameEncoder(core, args.model_encoder, args.device)
-    flame = models.Flame(core, args.model_flame, args.device, flame_model_params_num)
+    flame = models.Flame(core, args.model_flame, args.device)
 
     log.info(20*'-' + 'Encoding input image' + 20*'-')
     parameters = flame_encoder(cropped_face)

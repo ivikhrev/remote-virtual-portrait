@@ -20,7 +20,7 @@ jobs:
       - name: Prepare to run
         run: |
           omz_downloader --name ultra-lightweight-face-detection-rfb-320
-          omz_converter --name ultra-lightweight-face-detection-rfb-320
+          omz_converter --name ultra-lightweight-face-detection-rfb-320 --precisions FP32
 
       - name: Run application
         run: |
