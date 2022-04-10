@@ -21,7 +21,7 @@ class Visualizer(pyglet.window.Window):
         super().__init__(width=width, height=height, visible=show, fullscreen=False)
         self.show = show
         self.x, self.y, self.z = 0, 0, -1
-        self.rot_x, self.rot_y = 0, 0
+        self.rot_x, self.rot_y, self.rot_z = 5, -15, -5
         self.res_img_name = mesh_obj_filename.split('.')[0] + '.png'
         self.is_running = True
         self.meshes = pywavefront.Wavefront(mesh_obj_filename)
@@ -52,6 +52,7 @@ class Visualizer(pyglet.window.Window):
         gl.glTranslatef(self.x, self.y, self.z)
         gl.glRotatef(self.rot_y, 1, 0, 0)
         gl.glRotatef(self.rot_x, 0, 1, 0)
+        gl.glRotatef(self.rot_z, 0, 0, 1)
         pywavefront.visualization.draw(self.meshes)
 
     def on_close(self):
