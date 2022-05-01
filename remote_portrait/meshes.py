@@ -1,6 +1,7 @@
 import logging
 import os
 
+import cv2
 import numpy as np
 
 
@@ -12,6 +13,20 @@ def tensor2image(tensor):
     image = np.maximum(np.minimum(image, 255), 0)
     image = image.transpose(1,2,0)[:,:,[2,1,0]]
     return image.astype(np.uint8).copy()
+
+
+def vertex_normals(vertices, faces):
+    """
+    :param vertices: [batch size, number of vertices, 3]
+    :param faces: [batch size, number of faces, 3]
+    :return: [batch size, number of vertices, 3]
+    """
+    v0 = vertices[faces[:, 0] - 1]
+    v1 = vertices[faces[:, 1] - 1]
+    v2 = vertices[faces[:, 2] - 1]
+    cross_product = np.cross(v1 - v0, v2 - v0) # 1 - 0, 2 - 0
+    normals = cross_product / np.linalg.norm(cross_product, axis=1, keepdims=True)
+    return normals
 
 
 def write_obj(obj_name,
@@ -36,9 +51,9 @@ def write_obj(obj_name,
     '''
     if os.path.splitext(obj_name)[-1] != '.obj':
         obj_name = obj_name + '.obj'
-    # mtl_name = obj_name.replace('.obj', '.mtl')
-    # texture_name = obj_name.replace('.obj', '.png')
-    # material_name = 'FaceTexture'
+    mtl_name = obj_name.replace('.obj', '.mtl')
+    texture_name = obj_name.replace('.obj', '.png')
+    material_name = 'FaceTexture'
 
     #faces = faces.copy()
     # mesh lab start with 1, python/c++ start from 0
@@ -51,11 +66,11 @@ def write_obj(obj_name,
     # write obj
     with open(obj_name, 'w') as obj_file:  # pylint: disable=W1514
         # first line: write mtlib(material library)
-        # obj_file.write('# %s\n' % os.path.basename(obj_name))
-        # obj_file.write('#\n')
-        # obj_file.write('\n')
-        # if texture is not None:
-        #     obj_file.write('mtllib %s\n\n' % os.path.basename(mtl_name))
+        obj_file.write('# %s\n' % os.path.basename(obj_name))
+        obj_file.write('#\n')
+        obj_file.write('\n')
+        if texture is not None:
+            obj_file.write('mtllib %s\n\n' % os.path.basename(mtl_name))
 
         # write vertices
         if colors is None:
@@ -67,58 +82,63 @@ def write_obj(obj_name,
                     f'v {vertices[i, 0]} {vertices[i, 1]} {vertices[i, 2]} '
                         f'{vertices[i, 3]} {vertices[i, 4]} {vertices[i, 5]}\n')
 
-        for i in range(faces.shape[0]):
-            v1 = vertices[faces[i, 2] - 1]
-            v2 = vertices[faces[i, 1] - 1]
-            v3 = vertices[faces[i, 0] - 1]
-            cross_product = np.cross(v2 - v3, v1 - v3)
-            normal = cross_product / np.linalg.norm(cross_product)
+        normals = vertex_normals(vertices, faces)
+        for normal in normals:
             obj_file.write('vn {} {} {}\n'.format(*normal))  # pylint: disable=C0209
+        # for i in range(faces.shape[0]):
+        #     v1 = vertices[faces[i, 2] - 1]
+        #     v2 = vertices[faces[i, 1] - 1]
+        #     v3 = vertices[faces[i, 0] - 1]
+        #     cross_product = np.cross(v2 - v3, v1 - v3)
+        #     normal = cross_product / np.linalg.norm(cross_product)
+        #     obj_file.write('vn {} {} {}\n'.format(*normal))  # pylint: disable=C0209
 
         # # write uv coords
         if texture is None:
             for i in range(faces.shape[0]):
                 obj_file.write(f'f {faces[i, 0]}//{i + 1} {faces[i, 1]}//{i + 1} {faces[i, 2]}//{i + 1}\n')
-    log.info(f"Saved resulted .obj file : {obj_name}")
-        # else:
-        #     for i in range(uvcoords.shape[0]):
-        #         f.write('vt {} {}\n'.format(uvcoords[i,0], uvcoords[i,1]))
-        #     f.write('usemtl %s\n' % material_name)
-        #     # write f: ver ind/ uv ind
-        #     uvfaces = uvfaces + 1
-        #     for i in range(faces.shape[0]):
-        #         f.write('f {}/{} {}/{} {}/{}\n'.format(
-        #             #  faces[i, 2], uvfaces[i, 2],
-        #             #  faces[i, 1], uvfaces[i, 1],
-        #             #  faces[i, 0], uvfaces[i, 0]
-        #             faces[i, 0], uvfaces[i, 0],
-        #             faces[i, 1], uvfaces[i, 1],
-        #             faces[i, 2], uvfaces[i, 2]
-        #         )
-        #         )
-        #     # write mtl
-        #     with open(mtl_name, 'w') as f:
-        #         f.write('newmtl %s\n' % material_name)
-        #         s = 'map_Kd {}\n'.format(os.path.basename(texture_name)) # map to image
-        #         f.write(s)
+        else:
+            for i in range(uvcoords.shape[0]):
+                obj_file.write('vt {} {}\n'.format(uvcoords[i, 0], uvcoords[i, 1]))
+            obj_file.write('usemtl %s\n' % material_name)
 
-        #         if normal_map is not None:
-        #             name, _ = os.path.splitext(obj_name)
-        #             normal_name = f'{name}_normals.png'
-        #             f.write(f'disp {normal_name}')
-        #             # out_normal_map = normal_map / (np.linalg.norm(
-        #             #     normal_map, axis=-1, keepdims=True) + 1e-9)
-        #             # out_normal_map = (out_normal_map + 1) * 0.5
+            # write f: ver ind/ uv ind
+            uvfaces = uvfaces + 1
+            for i in range(faces.shape[0]):
+                obj_file.write('f {}/{}/{} {}/{}/{} {}/{}/{}\n'.format(
+                    #  faces[i, 2], uvfaces[i, 2],
+                    #  faces[i, 1], uvfaces[i, 1],
+                    #  faces[i, 0], uvfaces[i, 0]
+                    faces[i, 0], uvfaces[i, 0], i + 1,
+                    faces[i, 1], uvfaces[i, 1], i + 1,
+                    faces[i, 2], uvfaces[i, 2], i + 1)
+                )
+            # write mtl
+            with open(mtl_name, 'w') as mtl_file:
+                mtl_file.write('newmtl %s\n' % material_name)
+                s = 'map_Kd {}\n'.format(os.path.basename(texture_name)) # map to image
+                mtl_file.write(s)
 
-        #             cv2.imwrite(
-        #                 normal_name,
-        #                 # (out_normal_map * 255).astype(np.uint8)[:, :, ::-1]
-        #                 normal_map
-        #             )
-        #     cv2.imwrite(texture_name, texture)
+                # if normal_map is not None:
+                #     name, _ = os.path.splitext(obj_name)
+                #     normal_name = f'{name}_normals.png'
+                #     f.write(f'disp {normal_name}')
+                #     # out_normal_map = normal_map / (np.linalg.norm(
+                #     #     normal_map, axis=-1, keepdims=True) + 1e-9)
+                #     # out_normal_map = (out_normal_map + 1) * 0.5
+
+                #     cv2.imwrite(
+                #         normal_name,
+                #         # (out_normal_map * 255).astype(np.uint8)[:, :, ::-1]
+                #         normal_map
+                #     )
+            cv2.imwrite(texture_name, texture)
+        log.info(f"Saved resulted .obj file : {obj_name}")
+        log.info(f"Saved resulted mtl file : {mtl_name}")
+        log.info(f"Saved resulted texture : {texture_name}")
 
 
-def save_obj(obj_filename, opdict, template_path):
+def save_obj(obj_filename, opdict, template_path, texture, uvcoords, uvfaces):
     '''
     vertices: [nv, 3], tensor
     texture: [3, h, w], tensor
@@ -127,16 +147,18 @@ def save_obj(obj_filename, opdict, template_path):
     vertices = opdict['verts'][i]
     #verts, uvcoords, faces, uvfaces= load_obj(template_path)
     _, _, faces, _= load_obj(template_path)
-    faces = faces[None, ...][0]
+    #faces = faces[None, ...][0]
     # texture = tensor2image(opdict['uv_texture_gt'][i])
     # uvcoords = self.render.raw_uvcoords[0]
     # uvfaces = self.render.uvfaces[0]
     # save coarse mesh, with texture and normal map
     #normal_map = tensor2image(opdict['uv_detail_normals'][i] * 0.5 + 0.5)
-    write_obj(obj_filename, vertices, faces)
-                    # texture=texture,
-                    # uvcoords=uvcoords,
-                    # uvfaces=uvfaces,
+    write_obj(obj_filename,
+                vertices,
+                faces,
+                texture=texture,
+                uvcoords=uvcoords,
+                uvfaces=uvfaces)
                     # normal_map=normal_map)
     # # upsample mesh, save detailed mesh
     # texture = texture[:,:,[2,1,0]]

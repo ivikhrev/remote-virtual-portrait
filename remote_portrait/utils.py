@@ -39,10 +39,10 @@ def log_model_info(model):
     log.info(f"Model name: {model.get_name()}")
     log.info("Inputs:")
     for input_ in model.inputs:
-        log.info(f"\t{input_.get_any_name()} : shape {input_.shape}")
+        log.info(f"\t{input_.get_any_name()} : shape {input_.partial_shape}")
     log.info("Outputs:")
     for output_ in model.outputs:
-        log.info(f"\t{output_.get_any_name()} : shape {output_.shape}")
+        log.info(f"\t{output_.get_any_name()} : shape {output_.partial_shape}")
 
 
 def batch_orth_proj(X, camera):

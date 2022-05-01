@@ -14,7 +14,6 @@ pywavefront.configure_logging(
 )
 
 
-
 # pylint: disable=W0223
 class Visualizer(pyglet.window.Window):
     def __init__ (self, width, height, mesh_obj_filename, show=True):
@@ -40,7 +39,7 @@ class Visualizer(pyglet.window.Window):
         self.clear()
         gl.glLoadIdentity()
         gl.glEnable(gl.GL_LIGHTING)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (gl.GLfloat*4)(5, 5, 5, 1))
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (gl.GLfloat*4)(0, 0, 2, 0))
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, (gl.GLfloat*4)(0, 0, 0, 1))
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, (gl.GLfloat*4)(1, 1, 1, 1))
         gl.glEnable(gl.GL_LIGHT0)
