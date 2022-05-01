@@ -1,0 +1,463 @@
+<?xml version="1.0"?>
+<mapping>
+	<map>
+		<framework name="input.1" output_port_id="input.1" />
+		<IR name="input.1" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="conv1_1.weight" output_port_id="conv1_1.weight" />
+		<IR name="conv1_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="66" output_port_id="66" />
+		<IR name="66" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="67" output_port_id="67" />
+		<IR name="67" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv1_2.weight" output_port_id="conv1_2.weight" />
+		<IR name="conv1_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="68" output_port_id="68" />
+		<IR name="68" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="69" output_port_id="69" />
+		<IR name="69" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="70" output_port_id="70" />
+		<IR name="70" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv2_1.weight" output_port_id="conv2_1.weight" />
+		<IR name="conv2_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="71" output_port_id="71" />
+		<IR name="71" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="72" output_port_id="72" />
+		<IR name="72" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv2_2.weight" output_port_id="conv2_2.weight" />
+		<IR name="conv2_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="73" output_port_id="73" />
+		<IR name="73" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="74" output_port_id="74" />
+		<IR name="74" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="75" output_port_id="75" />
+		<IR name="75" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv3_1.weight" output_port_id="conv3_1.weight" />
+		<IR name="conv3_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="76" output_port_id="76" />
+		<IR name="76" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="77" output_port_id="77" />
+		<IR name="77" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv3_2.weight" output_port_id="conv3_2.weight" />
+		<IR name="conv3_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="78" output_port_id="78" />
+		<IR name="78" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="79" output_port_id="79" />
+		<IR name="79" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv3_3.weight" output_port_id="conv3_3.weight" />
+		<IR name="conv3_3.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="80" output_port_id="80" />
+		<IR name="80" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="81" output_port_id="81" />
+		<IR name="81" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="82" output_port_id="82" />
+		<IR name="82" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv4_1.weight" output_port_id="conv4_1.weight" />
+		<IR name="conv4_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="83" output_port_id="83" />
+		<IR name="83" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="84" output_port_id="84" />
+		<IR name="84" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv4_2.weight" output_port_id="conv4_2.weight" />
+		<IR name="conv4_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="85" output_port_id="85" />
+		<IR name="85" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="86" output_port_id="86" />
+		<IR name="86" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv4_3.weight" output_port_id="conv4_3.weight" />
+		<IR name="conv4_3.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="87" output_port_id="87" />
+		<IR name="87" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="88" output_port_id="88" />
+		<IR name="88" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="89" output_port_id="89" />
+		<IR name="89" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv5_1.weight" output_port_id="conv5_1.weight" />
+		<IR name="conv5_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="90" output_port_id="90" />
+		<IR name="90" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="91" output_port_id="91" />
+		<IR name="91" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv5_2.weight" output_port_id="conv5_2.weight" />
+		<IR name="conv5_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="92" output_port_id="92" />
+		<IR name="92" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="93" output_port_id="93" />
+		<IR name="93" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv5_3.weight" output_port_id="conv5_3.weight" />
+		<IR name="conv5_3.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="94" output_port_id="94" />
+		<IR name="94" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="95" output_port_id="95" />
+		<IR name="95" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="96" output_port_id="96" />
+		<IR name="96" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="fc6.weight" output_port_id="fc6.weight" />
+		<IR name="fc6.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="97" output_port_id="97" />
+		<IR name="97" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="98" output_port_id="98" />
+		<IR name="98" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="fc7.weight" output_port_id="fc7.weight" />
+		<IR name="fc7.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="99" output_port_id="99" />
+		<IR name="99" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="100" output_port_id="100" />
+		<IR name="100" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv6_1.weight" output_port_id="conv6_1.weight" />
+		<IR name="conv6_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="101" output_port_id="101" />
+		<IR name="101" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="102" output_port_id="102" />
+		<IR name="102" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv6_2.weight" output_port_id="conv6_2.weight" />
+		<IR name="conv6_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="103" output_port_id="103" />
+		<IR name="103" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="104" output_port_id="104" />
+		<IR name="104" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv7_1.weight" output_port_id="conv7_1.weight" />
+		<IR name="conv7_1.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="105" output_port_id="105" />
+		<IR name="105" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="106" output_port_id="106" />
+		<IR name="106" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv7_2.weight" output_port_id="conv7_2.weight" />
+		<IR name="conv7_2.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="107" output_port_id="107" />
+		<IR name="107" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="108" output_port_id="108" />
+		<IR name="108" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="conv7_2_mbox_loc.weight" output_port_id="conv7_2_mbox_loc.weight" />
+		<IR name="conv7_2_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="153" output_port_id="153" />
+		<IR name="153" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv7_2_mbox_conf.weight" output_port_id="conv7_2_mbox_conf.weight" />
+		<IR name="conv7_2_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="152" output_port_id="152" />
+		<IR name="152" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv6_2_mbox_loc.weight" output_port_id="conv6_2_mbox_loc.weight" />
+		<IR name="conv6_2_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="151" output_port_id="151" />
+		<IR name="151" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv6_2_mbox_conf.weight" output_port_id="conv6_2_mbox_conf.weight" />
+		<IR name="conv6_2_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="150" output_port_id="150" />
+		<IR name="150" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="fc7_mbox_loc.weight" output_port_id="fc7_mbox_loc.weight" />
+		<IR name="fc7_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="149" output_port_id="149" />
+		<IR name="149" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="fc7_mbox_conf.weight" output_port_id="fc7_mbox_conf.weight" />
+		<IR name="fc7_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="148" output_port_id="148" />
+		<IR name="148" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="133" output_port_id="133" />
+		<IR name="133" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="134" output_port_id="134" />
+		<IR name="134" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="135" output_port_id="135" />
+		<IR name="135" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="137" output_port_id="137" />
+		<IR name="137" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="138" output_port_id="138" />
+		<IR name="138" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="166" output_port_id="166" />
+		<IR name="166" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="141" output_port_id="141" />
+		<IR name="141" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv5_3_norm_mbox_loc.weight" output_port_id="conv5_3_norm_mbox_loc.weight" />
+		<IR name="conv5_3_norm_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="147" output_port_id="147" />
+		<IR name="147" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv5_3_norm_mbox_conf.weight" output_port_id="conv5_3_norm_mbox_conf.weight" />
+		<IR name="conv5_3_norm_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="146" output_port_id="146" />
+		<IR name="146" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="122" output_port_id="122" />
+		<IR name="122" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="123" output_port_id="123" />
+		<IR name="123" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="124" output_port_id="124" />
+		<IR name="124" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="126" output_port_id="126" />
+		<IR name="126" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="127" output_port_id="127" />
+		<IR name="127" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="164" output_port_id="164" />
+		<IR name="164" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="130" output_port_id="130" />
+		<IR name="130" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv4_3_norm_mbox_loc.weight" output_port_id="conv4_3_norm_mbox_loc.weight" />
+		<IR name="conv4_3_norm_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="145" output_port_id="145" />
+		<IR name="145" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv4_3_norm_mbox_conf.weight" output_port_id="conv4_3_norm_mbox_conf.weight" />
+		<IR name="conv4_3_norm_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="144" output_port_id="144" />
+		<IR name="144" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="111" output_port_id="111" />
+		<IR name="111" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="112" output_port_id="112" />
+		<IR name="112" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="113" output_port_id="113" />
+		<IR name="113" output_port_id="1" />
+	</map>
+	<map>
+		<framework name="115" output_port_id="115" />
+		<IR name="115" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="116" output_port_id="116" />
+		<IR name="116" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="162" output_port_id="162" />
+		<IR name="162" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="119" output_port_id="119" />
+		<IR name="119" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv3_3_norm_mbox_loc.weight" output_port_id="conv3_3_norm_mbox_loc.weight" />
+		<IR name="conv3_3_norm_mbox_loc.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="143" output_port_id="143" />
+		<IR name="143" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="conv3_3_norm_mbox_conf.weight" output_port_id="conv3_3_norm_mbox_conf.weight" />
+		<IR name="conv3_3_norm_mbox_conf.weight" output_port_id="0" />
+	</map>
+	<map>
+		<framework name="142" output_port_id="142" />
+		<IR name="142" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="157" output_port_id="154" />
+		<IR name="157" output_port_id="3" />
+	</map>
+	<map>
+		<framework name="157" output_port_id="155" />
+		<IR name="157" output_port_id="4" />
+	</map>
+	<map>
+		<framework name="157" output_port_id="156" />
+		<IR name="157" output_port_id="5" />
+	</map>
+	<map>
+		<framework name="157" output_port_id="157" />
+		<IR name="157" output_port_id="6" />
+	</map>
+	<map>
+		<framework name="158" output_port_id="158" />
+		<IR name="158" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="159" output_port_id="159" />
+		<IR name="159" output_port_id="2" />
+	</map>
+	<map>
+		<framework name="160" output_port_id="160" />
+		<IR name="160" output_port_id="2" />
+	</map>
+</mapping>
