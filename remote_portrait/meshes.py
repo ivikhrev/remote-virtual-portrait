@@ -52,7 +52,7 @@ def write_obj(obj_name,
     if os.path.splitext(obj_name)[-1] != '.obj':
         obj_name = obj_name + '.obj'
     mtl_name = obj_name.replace('.obj', '.mtl')
-    texture_name = obj_name.replace('.obj', '.png')
+    texture_name = "texture_" + obj_name.replace('.obj', '.png')
     material_name = 'FaceTexture'
 
     #faces = faces.copy()

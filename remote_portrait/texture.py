@@ -30,9 +30,6 @@ class Rasterizer:
         }
 
     def __call__(self, vertices, faces, attributes=None, h=None, w=None):
-        # vertices = torch.cat([vertices, vertices[:,:,0:1]*0.+1.], -1) #[bz, ntv, 3]
-        # verticess = vertices*2 - 1
-        # vertices[...,1] = -vertices[...,1]
         fixed_vertices = vertices.clone()
         fixed_vertices[...,:2] = -fixed_vertices[...,:2]
         if h is None and w is None:
@@ -70,6 +67,7 @@ class Rasterizer:
         pixel_vals = torch.cat([pixel_vals, vismask[:,:,:,0][:,None,:,:]], dim=1)
 
         return pixel_vals
+
 
 class Texture:
     def __init__(self, head_template_obj, fixed_uv_displacement, uv_face_eye_mask):
@@ -112,8 +110,6 @@ class Texture:
 
         vis_texture = cv2.cvtColor(uv_texture_gt.numpy().transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR)
         cv2.imshow("uv_texture", vis_texture)
-        # cv2.waitKey(0)
-        # cv2.imwrite("texture.png", vis_texture * 255)
 
         return vis_texture * 255, self.raw_uvcoords, self.templ_uvfaces
 

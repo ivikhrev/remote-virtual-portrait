@@ -55,7 +55,6 @@ class SFD(Model):
         self.req = self.compiled_model.create_infer_request()
         self.image_blob_name = self.input_names[0]
         self.n, self.c, self.h, self.w = self.model.input().get_partial_shape()
-        print(self.h, self.w)
         self.scores_tensor_name = self.output_names[0]
         self.bboxes_tensor_name = self.output_names[1]
         self.confidence_threshold = conf_t

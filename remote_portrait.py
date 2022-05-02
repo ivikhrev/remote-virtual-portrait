@@ -33,6 +33,7 @@ from remote_portrait.config import Config
 from remote_portrait.visualizer import Visualizer
 from remote_portrait.texture import Texture
 
+
 def build_argparser():
     parser = ArgumentParser()
     args = parser.add_argument_group('Options')
@@ -80,9 +81,8 @@ def main():
     core = ov.Core()
     log.info(20*'-' + 'Crop face from image' + 20*'-')
 
-    h, w, _ = img.shape
     device = config.properties["device"]
-    fd_model = models.SFD(core, config.properties["face_detector"], device, h, w)
+    fd_model = models.SFD(core, config.properties["face_detector"], device)
 
     detections = fd_model(img)
 
