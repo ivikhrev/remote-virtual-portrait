@@ -109,7 +109,7 @@ class Texture:
             + np.multiply(uv_texture[:,:3,:,:], (1 - self.uv_face_eye_mask))
 
         vis_texture = cv2.cvtColor(uv_texture_gt.numpy().transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR)
-        cv2.imshow("uv_texture", vis_texture)
+        # cv2.imshow("uv_texture", vis_texture)
 
         return vis_texture * 255, self.raw_uvcoords, self.templ_uvfaces
 

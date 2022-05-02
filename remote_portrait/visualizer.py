@@ -1,11 +1,13 @@
 import logging
-
-import trimesh
-import pyrender
-import numpy as np
-
 from math import sin, cos, radians
+
+import numpy as np
+import pyrender
+import trimesh
+
+
 log = logging.getLogger('Global log')
+
 
 def euler_to_rotation_matrix(yaw, pitch, roll, angles=False):
     if angles:
@@ -26,13 +28,15 @@ def euler_to_rotation_matrix(yaw, pitch, roll, angles=False):
 
     return res
 
+
 # pylint: disable=W0223
 class Visualizer:
-    def __init__ (self, mesh_obj_filename):
+    def __init__ (self, mesh_obj_filename, window_size):
         mesh = trimesh.load(mesh_obj_filename)
         mesh = pyrender.Mesh.from_trimesh(mesh)
+        self.size = window_size
         self.head = pyrender.Node(mesh=mesh, matrix=np.eye(4))
-        self.scene = pyrender.Scene()
+        self.scene = pyrender.Scene(bg_color=(0,0,0,0), ambient_light=(255, 255, 255))
         self.scene.add_node(self.head)
         camera = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=1.414)
         camera_pos = np.eye(4)
@@ -40,7 +44,7 @@ class Visualizer:
         self.scene.add(camera, pose=camera_pos)
 
     def run(self, pose):
-        v = pyrender.Viewer(self.scene, run_in_thread=True, use_raymond_lighting=True)
+        v = pyrender.Viewer(self.scene, viewport_size=self.size, use_raymond_lighting=True)
 
         while True:
             r = euler_to_rotation_matrix(pose["yaw"], pose["pitch"], pose["roll"], angles=True)

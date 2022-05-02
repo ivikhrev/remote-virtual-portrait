@@ -103,8 +103,8 @@ def main():
 
     cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
 
-    if not config.properties["no_show"]:
-        cv2.imshow("cropped face", cropped_face)
+    # if not config.properties["no_show"]:
+    #     cv2.imshow("cropped face", cropped_face)
 
     log.info(20 * '-' + 'Initialize models' + 20 * '-')
     flame_encoder = models.FlameEncoder(core, config.properties["flame_encoder"], device)
@@ -139,12 +139,12 @@ def main():
         tex, uvcoords, uvfaces = texture_generator(cropped_face, albedo, uv_z,
             result_dict['verts'], result_dict['trans_verts'], parameters['light'])
         uvfaces = uvfaces[0]
-        uvcoords = uvfaces[0]
+        uvcoords = uvcoords[0]
 
     meshes.save_obj(config.properties["output_name"], result_dict,
         config.properties["head_template"], tex, uvcoords, uvfaces)
 
-    visualizer = Visualizer(config.properties["output_name"])
+    visualizer = Visualizer(config.properties["output_name"], config.properties["visualizer_size"])
     visualizer.run(pose)
 
     end_time = perf_counter()
