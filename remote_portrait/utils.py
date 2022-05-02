@@ -51,11 +51,11 @@ def batch_orth_proj(X, camera):
         camera: scale and translation, [bz, 3], [scale, tx, ty]
     '''
     camera = camera.copy().reshape((-1, 1, 3))
-    X_trans = X[:, :, :2] + camera[:, :, 1:]
-    X_trans = np.concatenate([X_trans, X[:,:,2:]], axis=2)
+    x_trans = X[:, :, :2] + camera[:, :, 1:]
+    x_trans = np.concatenate([x_trans, X[:,:,2:]], axis=2)
     #shape = X_trans.shape
-    Xn = (camera[:, :, 0:1] * X_trans)
-    return Xn
+    xn = (camera[:, :, 0:1] * x_trans)
+    return xn
 
 
 def nms(x1, y1, x2, y2, scores, thresh, keep_top_k=None):

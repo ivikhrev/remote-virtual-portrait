@@ -22,16 +22,17 @@ try:
     log.info("Trying to get display...")
     display = get_display()
     log.info("Successfully")
-except Exception:
+except Exception:  # pylint: disable=W0703
     log.info("Can't get physical display. Create virtual one.")
     from pyvirtualdisplay import Display
     virtual_display = Display(visible=0, size=(1920, 1080))
     virtual_display.start()
 
+# pylint: disable=C0413
 from remote_portrait import models, meshes
 from remote_portrait.config import Config
-from remote_portrait.visualizer import Visualizer
 from remote_portrait.texture import Texture
+from remote_portrait.visualizer import Visualizer
 
 
 def build_argparser():
@@ -51,8 +52,10 @@ def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1):
 
 def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
     orig_h, orig_w, _ = img.shape
-    bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w), np.clip(bottom_left_point[1], 0, orig_h))
-    top_right_point = (np.clip(top_right_point[0], 0, orig_w), np.clip(top_right_point[1], 0, orig_h))
+    bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w),
+        np.clip(bottom_left_point[1], 0, orig_h))
+    top_right_point = (np.clip(top_right_point[0], 0, orig_w),
+        np.clip(top_right_point[1], 0, orig_h))
 
     h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
 
@@ -88,7 +91,7 @@ def main():
 
     if len(detections) == 0:
         raise RuntimeError("No face detected!")
-    elif len(detections) > 1:
+    if len(detections) > 1:
         raise RuntimeError("More than 1 face detected! Please provide image with 1 face only!")
     face = detections[0]
 
@@ -98,7 +101,7 @@ def main():
     cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
 
     if not config.properties["no_show"]:
-       cv2.imshow("cropped face", cropped_face)
+        cv2.imshow("cropped face", cropped_face)
 
     log.info(20 * '-' + 'Initialize models' + 20 * '-')
     flame_encoder = models.FlameEncoder(core, config.properties["flame_encoder"], device)
@@ -115,7 +118,8 @@ def main():
     parameters['details'] = details
 
     log.info(20*'-' + 'Decode details model output' + 20*'-')
-    uv_z = detail_decoder(np.concatenate((parameters['pose'][:,3:], parameters['exp'], parameters['details']), axis=1))
+    uv_z = detail_decoder(np.concatenate((parameters['pose'][:,3:],
+        parameters['exp'], parameters['details']), axis=1))
 
     log.info(20*'-' + 'Build Flame 3D model' + 20*'-')
     result_dict = flame(parameters)
@@ -130,7 +134,8 @@ def main():
     tex, uvcoords, uvfaces = texture_generator(cropped_face, albedo, uv_z,
         result_dict['verts'], result_dict['trans_verts'], parameters['light'])
 
-    meshes.save_obj(config.properties["output_name"], result_dict, config.properties["head_template"], tex, uvcoords[0], uvfaces[0])
+    meshes.save_obj(config.properties["output_name"], result_dict,
+        config.properties["head_template"], tex, uvcoords[0], uvfaces[0])
     visualizer = Visualizer(800, 600, config.properties["output_name"], not config.properties["no_show"])
     visualizer.run()
     end_time = perf_counter()
