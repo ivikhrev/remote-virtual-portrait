@@ -127,15 +127,19 @@ def main():
     log.info(20*'-' + 'Create Flame texture' + 20*'-')
     albedo = flame_texture(parameters['tex'])
 
-    texture_generator = Texture(io.load_obj(config.properties["head_template"]),
-        np.load(config.properties["fixed_uv_displacement"]),
-        cv2.imread(config.properties["uv_face_eye_mask"], cv2.IMREAD_GRAYSCALE))
+    tex = uvfaces = uvcoords = None
+    if config.properties["use_tex"]:
+        texture_generator = Texture(io.load_obj(config.properties["head_template"]),
+            np.load(config.properties["fixed_uv_displacement"]),
+            cv2.imread(config.properties["uv_face_eye_mask"], cv2.IMREAD_GRAYSCALE))
 
-    tex, uvcoords, uvfaces = texture_generator(cropped_face, albedo, uv_z,
-        result_dict['verts'], result_dict['trans_verts'], parameters['light'])
+        tex, uvcoords, uvfaces = texture_generator(cropped_face, albedo, uv_z,
+            result_dict['verts'], result_dict['trans_verts'], parameters['light'])
+        uvfaces = uvfaces[0]
+        uvcoords = uvfaces[0]
 
     meshes.save_obj(config.properties["output_name"], result_dict,
-        config.properties["head_template"], tex, uvcoords[0], uvfaces[0])
+        config.properties["head_template"], tex, uvcoords, uvfaces)
     visualizer = Visualizer(800, 600, config.properties["output_name"], not config.properties["no_show"])
     visualizer.run()
     end_time = perf_counter()

@@ -1,6 +1,6 @@
 {
     "device" : "CPU",
-    "test_input" : "remote-portrait/test_data/me.jpg",
+    "test_input" : "remote-portrait/test_data/test.png",
     "head_template" : "remote-portrait/resources/head_template.obj",
     "uv_face_eye_mask" : "remote-portrait/resources/uv_face_eye_mask.png",
     "fixed_uv_displacement": "remote-portrait/resources/fixed_displacement_256.npy",
@@ -22,5 +22,6 @@
     },
     "input_image_size" : 224,
     "visualizer_size" : [800, 600],
+    "use_tex" : false,
     "no_show" : false
 }
