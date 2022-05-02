@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 import cv2
 import openvino.runtime as ov
 import numpy as np
-from pyglet.canvas import get_display
 from pytorch3d import io
 
 log = logging.getLogger('Global log')
@@ -17,16 +16,6 @@ log.setLevel(logging.DEBUG)
 log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(logging.Formatter('[ %(levelname)s ] %(message)s'))
 
-
-try:
-    log.info("Trying to get display...")
-    display = get_display()
-    log.info("Successfully")
-except Exception:  # pylint: disable=W0703
-    log.info("Can't get physical display. Create virtual one.")
-    from pyvirtualdisplay import Display
-    virtual_display = Display(visible=0, size=(1920, 1080))
-    virtual_display.start()
 
 # pylint: disable=C0413
 from remote_portrait import models, meshes
@@ -89,6 +78,20 @@ def main():
 
     detections = fd_model(img)
 
+    head_pose_model = models.HeadPoseEstimation(core, config.properties["head_pose"], device)
+
+    pose = {
+        "yaw" : 0,
+        "pitch": 0,
+        "roll": 0
+    }
+
+    if config.properties["pose_image"]:
+        pose_img = cv2.imread(config.properties["pose_image"])
+        pose = head_pose_model(pose_img)
+
+    print("Head pose:", pose)
+
     if len(detections) == 0:
         raise RuntimeError("No face detected!")
     if len(detections) > 1:
@@ -140,8 +143,10 @@ def main():
 
     meshes.save_obj(config.properties["output_name"], result_dict,
         config.properties["head_template"], tex, uvcoords, uvfaces)
-    visualizer = Visualizer(800, 600, config.properties["output_name"], not config.properties["no_show"])
-    visualizer.run()
+
+    visualizer = Visualizer(config.properties["output_name"])
+    visualizer.run(pose)
+
     end_time = perf_counter()
     log.info(f"Total time: { (end_time - start_time) * 1e3 :.1f} ms")
 
