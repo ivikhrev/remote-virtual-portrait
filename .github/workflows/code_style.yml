@@ -16,6 +16,7 @@ jobs:
           python3 -m pip install pylint
       - name: Run pylint
         run: |
-          python3 -m pylint --recursive=y ./remote_portrait
+          cd ..
+          python3 -m pylint --recursive=y --rcfile=./remote-portrait/.pylintrc ./remote-portrait
         working-directory: .
 

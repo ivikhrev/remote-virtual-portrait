@@ -39,10 +39,10 @@ def log_model_info(model):
     log.info(f"Model name: {model.get_name()}")
     log.info("Inputs:")
     for input_ in model.inputs:
-        log.info(f"\t{input_.get_any_name()} : shape {input_.shape}")
+        log.info(f"\t{input_.get_any_name()} : shape {input_.partial_shape}")
     log.info("Outputs:")
     for output_ in model.outputs:
-        log.info(f"\t{output_.get_any_name()} : shape {output_.shape}")
+        log.info(f"\t{output_.get_any_name()} : shape {output_.partial_shape}")
 
 
 def batch_orth_proj(X, camera):
@@ -51,11 +51,11 @@ def batch_orth_proj(X, camera):
         camera: scale and translation, [bz, 3], [scale, tx, ty]
     '''
     camera = camera.copy().reshape((-1, 1, 3))
-    X_trans = X[:, :, :2] + camera[:, :, 1:]
-    X_trans = np.concatenate([X_trans, X[:,:,2:]], axis=2)
+    x_trans = X[:, :, :2] + camera[:, :, 1:]
+    x_trans = np.concatenate([x_trans, X[:,:,2:]], axis=2)
     #shape = X_trans.shape
-    Xn = (camera[:, :, 0:1] * X_trans)
-    return Xn
+    xn = (camera[:, :, 0:1] * x_trans)
+    return xn
 
 
 def nms(x1, y1, x2, y2, scores, thresh, keep_top_k=None):

@@ -20,19 +20,12 @@ jobs:
       - name: Prepare to run
         run: |
           omz_downloader --name ultra-lightweight-face-detection-rfb-320
-          omz_converter --name ultra-lightweight-face-detection-rfb-320
+          omz_converter --name ultra-lightweight-face-detection-rfb-320 --precisions FP32
 
       - name: Run application
         run: |
           export DISPLAY=:0
-          python3 remote_portrait.py \
-            -i ./test_data/test.png \
-            -m_fd ./public/ultra-lightweight-face-detection-rfb-320/FP32/ultra-lightweight-face-detection-rfb-320.xml \
-            -m_en ./models_ir/encoder_flame/E_flame.xml \
-            -m_flame ./models_ir/flame/flame.xml \
-            --template ./resources/head_template.obj \
-            -o res.obj \
-            --no_show
+          python3 remote_portrait.py --config config.json
         working-directory: .
 
       - uses: actions/upload-artifact@v2
@@ -41,3 +34,5 @@ jobs:
           path: |
             res.obj
             res.png
+            texture.png
+            res.mtl
