@@ -46,7 +46,7 @@ class Model(ABC):
 
 
 class SFD(Model):
-    def __init__(self, core, model_path, device, h=None, w=None, conf_t=0.5, iou_t=0.5):
+    def __init__(self, core, model_path, device, conf_t=0.5, iou_t=0.5):
         super().__init__(core, model_path, device, log_info=False, compile_model=False)
         self.model.reshape((1,3,-1,-1))
         log_model_info(self.model)
@@ -76,7 +76,8 @@ class SFD(Model):
 
         boxes = SFD.get_predictions(raw_results)
         filtered_boxes = boxes[boxes[:,4] > self.confidence_threshold]
-        keep = nms(filtered_boxes[:,0], filtered_boxes[:,1], filtered_boxes[:,2], filtered_boxes[:,3], filtered_boxes[:,4], self.iou_threshold)
+        keep = nms(filtered_boxes[:,0], filtered_boxes[:,1], filtered_boxes[:,2],
+            filtered_boxes[:,3], filtered_boxes[:,4], self.iou_threshold)
         filtered_boxes = filtered_boxes[keep]
         detections = [Detection(*det, 0) for det in filtered_boxes]
 
@@ -248,8 +249,8 @@ class Flame(Model):
 
     def postrocess(self, output_dict):
         vertices = output_dict[self.output_names[0]]
-        landmarks2d = output_dict[self.output_names[1]]  # TODO: convert models with names specifying
-        landmarks3d = output_dict[self.output_names[2]]  # ?
+        landmarks2d = output_dict[self.output_names[1]]  # maybe convert? models with names specifying
+        landmarks3d = output_dict[self.output_names[2]]
 
         landmarks3d_world = landmarks3d.copy()
 

@@ -66,11 +66,11 @@ def write_obj(obj_name,
     # write obj
     with open(obj_name, 'w') as obj_file:  # pylint: disable=W1514
         # first line: write mtlib(material library)
-        obj_file.write('# %s\n' % os.path.basename(obj_name))
+        obj_file.write(f"# {os.path.basename(obj_name)}\n")
         obj_file.write('#\n')
         obj_file.write('\n')
         if texture is not None:
-            obj_file.write('mtllib %s\n\n' % os.path.basename(mtl_name))
+            obj_file.write(f'mtllib {os.path.basename(mtl_name)}\n\n')
 
         # write vertices
         if colors is None:
@@ -114,7 +114,7 @@ def write_obj(obj_name,
                     faces[i, 2], uvfaces[i, 2], i + 1)
                 )
             # write mtl
-            with open(mtl_name, 'w') as mtl_file:
+            with open(mtl_name, 'w') as mtl_file:  # pylint: disable=W1514
                 mtl_file.write('newmtl %s\n' % material_name)
                 s = 'map_Kd {}\n'.format(os.path.basename(texture_name)) # map to image
                 mtl_file.write(s)

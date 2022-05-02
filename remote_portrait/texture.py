@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import cv2
 
 from pytorch3d.structures import Meshes
-from pytorch3d import io
 from pytorch3d.renderer.mesh import rasterize_meshes
 
 
@@ -46,7 +45,7 @@ class Rasterizer:
                 fixed_vertices[..., 0] = fixed_vertices[..., 0]*w/h
 
         meshes_screen = Meshes(verts=fixed_vertices, faces=faces)
-        pix_to_face, zbuf, bary_coords, dists = rasterize_meshes(
+        pix_to_face, _, bary_coords, _ = rasterize_meshes(
             meshes_screen,
             image_size=image_size,
             blur_radius=self.raster_settings['blur_radius'],
@@ -57,7 +56,8 @@ class Rasterizer:
         )
         vismask = (pix_to_face > -1).float()
         D = attributes.shape[-1]
-        attributes = attributes.clone(); attributes = attributes.view(attributes.shape[0] * attributes.shape[1], 3, attributes.shape[-1])
+        attributes = attributes.clone()
+        attributes = attributes.view(attributes.shape[0] * attributes.shape[1], 3, attributes.shape[-1])
         N, H, W, K, _ = bary_coords.shape
         mask = pix_to_face == -1
         pix_to_face = pix_to_face.clone()
@@ -78,8 +78,7 @@ class Texture:
         self.rasterizer = Rasterizer()
         self.dense_faces = Texture.generate_triangles(256, 256)
 
-        #_, self.templ_uvcoords, self.templ_faces, self.templ_uvfaces = head_template_obj
-        templ_verts, templ_faces, templ_aux = head_template_obj
+        _, templ_faces, templ_aux = head_template_obj
         templ_uvcoords = templ_aux.verts_uvs[None, ...]  # (N, V, 2)
         self.raw_uvcoords = templ_uvcoords.clone()
 
@@ -93,11 +92,14 @@ class Texture:
     def __call__(self, face_image, albedo, uv_z, verts, trans_verts, light):
         #preprocess images
         face_image = cv2.normalize(face_image, None, alpha=0 , beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-        face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)[np.newaxis].transpose(0,3,1,2)
-        self.uv_face_eye_mask = cv2.normalize(self.uv_face_eye_mask, None, alpha=0 , beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+        face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+        face_image = face_image[np.newaxis].transpose(0,3,1,2)
+        self.uv_face_eye_mask = cv2.normalize(self.uv_face_eye_mask, None, alpha=0,
+            beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         normals = Texture.normals(verts[0], self.templ_faces)
-        uv_detail_normals = self.displacement2normal(uv_z, verts, normals, self.uv_face_eye_mask, self.templ_faces, self.templ_uvcoords, self.templ_uvfaces)
+        uv_detail_normals = self.displacement2normal(uv_z, verts, normals, self.uv_face_eye_mask,
+            self.templ_faces, self.templ_uvcoords, self.templ_uvfaces)
         uv_shading = Texture.add_sh_light(uv_detail_normals, light)
         uv_texture = np.multiply(albedo, np.float32(uv_shading))
 
@@ -105,7 +107,8 @@ class Texture:
         uv_gt = F.grid_sample(torch.from_numpy(face_image), uv_pverts.permute(0,2,3,1)[:,:,:,:2], mode='bilinear')
 
         ## TODO: poisson blending should give better-looking results
-        uv_texture_gt = np.multiply(uv_gt[:,:3,:,:], self.uv_face_eye_mask) + np.multiply(uv_texture[:,:3,:,:], (1 - self.uv_face_eye_mask))
+        uv_texture_gt = np.multiply(uv_gt[:,:3,:,:], self.uv_face_eye_mask) \
+            + np.multiply(uv_texture[:,:3,:,:], (1 - self.uv_face_eye_mask))
 
         vis_texture = cv2.cvtColor(uv_texture_gt.numpy().transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR)
         cv2.imshow("uv_texture", vis_texture)
@@ -132,7 +135,6 @@ class Texture:
         vertices: [bz, V, 3]
         uv_vertices: [bz, 3, h, w]
         '''
-        batch_size = vertices.shape[0]
         face_vertices = Texture.get_face_vertices(vertices, faces)
         uv_vertices = self.rasterizer(uvcoords,uvfaces, torch.from_numpy(face_vertices))[:, :3] # remove
         return uv_vertices
@@ -145,12 +147,15 @@ class Texture:
         uv_coarse_normals = self.world2uv(coarse_normals, faces, uvcoords, uvfaces)
 
         uv_z = np.multiply(uv_z, uv_face_eye_mask)
-        uv_detail_vertices = uv_coarse_vertices.cpu().detach().numpy() + np.multiply(uv_z, uv_coarse_normals.cpu().detach().numpy()) \
-            + np.multiply(self.fixed_uv_displacement, uv_coarse_normals.cpu().detach().numpy())
+        uv_detail_vertices = uv_coarse_vertices.cpu().detach().numpy() + \
+            np.multiply(uv_z, uv_coarse_normals.cpu().detach().numpy()) + \
+            np.multiply(self.fixed_uv_displacement, uv_coarse_normals.cpu().detach().numpy())
         dense_vertices = np.transpose(uv_detail_vertices, (0,2,3,1)).reshape([batch_size, -1, 3])
         uv_detail_normals = self.normals(dense_vertices[0], self.dense_faces)
-        uv_detail_normals = np.transpose(uv_detail_normals.reshape([batch_size, uv_coarse_vertices.shape[2], uv_coarse_vertices.shape[3], 3]), (0,3,1,2))
-        uv_detail_normals = np.multiply(uv_detail_normals, uv_face_eye_mask) + np.multiply(uv_coarse_normals.numpy(), (1 - uv_face_eye_mask))
+        uv_detail_normals = np.transpose(uv_detail_normals.reshape(
+            [batch_size, uv_coarse_vertices.shape[2], uv_coarse_vertices.shape[3], 3]), (0,3,1,2))
+        uv_detail_normals = np.multiply(uv_detail_normals, uv_face_eye_mask) + \
+            np.multiply(uv_coarse_normals.numpy(), (1 - uv_face_eye_mask))
         return uv_detail_normals
 
     @staticmethod
@@ -201,7 +206,7 @@ class Texture:
         return normals  #normals[~np.isnan(normals).any(axis=1)]
 
     @staticmethod
-    def generate_triangles(h, w, margin_x=2, margin_y=5, mask = None):
+    def generate_triangles(h, w, margin_x=2, margin_y=5):
         # quad layout:
         # 0 1 ... w-1
         # w w+1

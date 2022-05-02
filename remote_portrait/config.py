@@ -26,7 +26,7 @@ class Config:
             Config._instance = super(Config, cls).__new__(cls)
         return Config._instance
 
-    def __init__(self, file_path=None, cli_args=None):
+    def __init__(self, file_path=None):
         """
         :param file_path: Path to json configuration file
         :type file_path: String
