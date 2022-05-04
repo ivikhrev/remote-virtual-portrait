@@ -25,6 +25,34 @@ class Detection:
         return self.xmin, self.ymin, self.xmax, self.ymax
 
 
+def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1):
+    h , w =  ymax - ymin, xmax - xmin
+    dx = int(w * coeffx)
+    dy = int(h * coeffy)
+    return (xmin - dx , ymin), (xmax + dx , ymax + dy)
+
+
+def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
+    orig_h, orig_w, _ = img.shape
+    bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w),
+        np.clip(bottom_left_point[1], 0, orig_h))
+    top_right_point = (np.clip(top_right_point[0], 0, orig_w),
+        np.clip(top_right_point[1], 0, orig_h))
+
+    h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
+
+    if h > w:
+        offset = h - w
+        crop = img[bottom_left_point[1]:top_right_point[1], np.clip(bottom_left_point[0]
+            - offset // 2, 0, orig_w):np.clip(top_right_point[0] + offset // 2, 0, orig_w)]
+    else:
+        offset = w - h
+        crop = img[np.clip(bottom_left_point[1] - offset // 2, 0, orig_h):np.clip(top_right_point[1]
+            + offset // 2, 0, orig_h), bottom_left_point[0]:top_right_point[0]]
+
+    return cv2.resize(crop, dsize=(target_size, target_size))
+
+
 def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
     if not keep_aspect_ratio:
         resized_frame = cv2.resize(image, size, interpolation=interpolation)

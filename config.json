@@ -5,14 +5,13 @@
     "uv_face_eye_mask" : "remote-portrait/resources/uv_face_eye_mask.png",
     "fixed_uv_displacement": "remote-portrait/resources/fixed_displacement_256.npy",
     "face_detector" : "remote-portrait/models_ir/face_detector/sfd.xml",
-    "head_pose" : "intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml",
+    "fast_face_detector" : "remote-portrait/public/ultra-lightweight-face-detection-rfb-320/FP32/ultra-lightweight-face-detection-rfb-320.xml",
     "flame" : "remote-portrait/models_ir/flame/flame.xml",
     "flame_texture" : "remote-portrait/models_ir/flametex/flametex.xml",
     "flame_encoder" : "remote-portrait/models_ir/encoder_flame/E_flame.xml",
     "details_encoder" : "remote-portrait/models_ir/encoder_detail/E_detail.xml",
     "details_decoder" : "remote-portrait/models_ir/decoder_detail/D_detail.xml",
     "output_name" : "res.obj",
-    "pose_image" : "remote-portrait/test_data/test.png",
 
     "flame_model_params_num" : {
         "shape" : 100,

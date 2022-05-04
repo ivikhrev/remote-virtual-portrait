@@ -24,6 +24,7 @@ from remote_portrait.config import Config
 from remote_portrait.images_capture import open_images_capture
 from remote_portrait.texture import Texture
 from remote_portrait.visualizer import Visualizer
+from remote_portrait import utils
 
 
 def build_argparser():
@@ -34,50 +35,17 @@ def build_argparser():
     return parser
 
 
-def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1):
-    h , w =  ymax - ymin, xmax - xmin
-    dx = int(w * coeffx)
-    dy = int(h * coeffy)
-    return (xmin - dx , ymin), (xmax + dx , ymax + dy)
-
-
-def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
-    orig_h, orig_w, _ = img.shape
-    bottom_left_point = (np.clip(bottom_left_point[0], 0, orig_w),
-        np.clip(bottom_left_point[1], 0, orig_h))
-    top_right_point = (np.clip(top_right_point[0], 0, orig_w),
-        np.clip(top_right_point[1], 0, orig_h))
-
-    h, w = top_right_point[1] - bottom_left_point[1], top_right_point[0] - bottom_left_point[0]
-
-    if h > w:
-        offset = h - w
-        crop = img[bottom_left_point[1]:top_right_point[1], np.clip(bottom_left_point[0]
-            - offset // 2, 0, orig_w):np.clip(top_right_point[0] + offset // 2, 0, orig_w)]
-    else:
-        offset = w - h
-        crop = img[np.clip(bottom_left_point[1] - offset // 2, 0, orig_h):np.clip(top_right_point[1]
-            + offset // 2, 0, orig_h), bottom_left_point[0]:top_right_point[0]]
-
-    return cv2.resize(crop, dsize=(target_size, target_size))
-
-
 def main():
     args = build_argparser().parse_args()
     config = Config(file_path=args.config)
     start_time = perf_counter()
 
-    pose = {
-        "yaw" : 0,
-        "pitch": 0,
-        "roll": 0
-    }
-
     log.info(20 * '-' + 'Initialize models' + 20 * '-')
     device = config.properties["device"]
     core = ov.Core()
     face_detector = models.SFD(core, config.properties["face_detector"], device)
-    head_pose_estimator = models.HeadPoseEstimation(core, config.properties["head_pose"], device)
+    fast_face_detector = models.UltraLightFace(core, config.properties["fast_face_detector"], device)
+    #head_pose_estimator = models.HeadPoseEstimation(core, config.properties["head_pose"], device)
     flame_encoder = models.FlameEncoder(core, config.properties["flame_encoder"], device)
     detail_encoder = models.DetailEncoder(core, config.properties["details_encoder"], device)
     detail_decoder = models.DetailDecoder(core,config.properties["details_decoder"], device)
@@ -95,9 +63,9 @@ def main():
         detections = face_detector(img)
         if len(detections) == 1:
             face = detections[0]
-            bottom_left, top_right = adjust_rect(face.xmin, face.ymin,
+            bottom_left, top_right = utils.adjust_rect(face.xmin, face.ymin,
                 face.xmax, face.ymax, 0.15, 0.2)
-            cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
+            cropped_face = utils.square_crop_resize(img, bottom_left, top_right, 224)
             cv2.rectangle(img, bottom_left, top_right, (255, 0, 255))
         elif len(detections) == 0:
             cv2.putText(img, "No face detected!", (int(w/3), int(4/5 *h)),
@@ -112,21 +80,6 @@ def main():
             break
 
     cv2.destroyAllWindows()
-
-
-    if config.properties["pose_image"]:
-        pose_img = cv2.imread(config.properties["pose_image"])
-        pose = head_pose_estimator(pose_img)
-
-    print("Head pose:", pose)
-
-    # bottom_left, top_right = adjust_rect(face.xmin, face.ymin,
-    #    face.xmax, face.ymax, 0.15, 0.2)
-
-    # cropped_face = square_crop_resize(img, bottom_left, top_right, 224)
-
-    # if not config.properties["no_show"]:
-    #     cv2.imshow("cropped face", cropped_face)
 
     log.info(20*'-' + 'Encode input image' + 20*'-')
     parameters = flame_encoder(cropped_face)
@@ -159,7 +112,7 @@ def main():
     meshes.save_obj(config.properties["output_name"], result_dict,
         config.properties["head_template"], tex, uvcoords, uvfaces)
 
-    visualizer = Visualizer(config.properties["output_name"], config.properties["visualizer_size"], face_detector, head_pose_estimator)
+    visualizer = Visualizer(config.properties["output_name"], config.properties["visualizer_size"], parameters, fast_face_detector, flame_encoder, flame)
     visualizer.run()
 
     end_time = perf_counter()
