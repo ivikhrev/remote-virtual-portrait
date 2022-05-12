@@ -1,10 +1,11 @@
 {
     "device" : "CPU",
-    "test_input" : "remote-portrait/test_data/me.jpg",
+    "test_input" : "remote-portrait/test_data/test.jpg",
     "head_template" : "remote-portrait/resources/head_template.obj",
     "uv_face_eye_mask" : "remote-portrait/resources/uv_face_eye_mask.png",
     "fixed_uv_displacement": "remote-portrait/resources/fixed_displacement_256.npy",
     "face_detector" : "remote-portrait/models_ir/face_detector/sfd.xml",
+    "fast_face_detector" : "remote-portrait/public/ultra-lightweight-face-detection-rfb-320/FP32/ultra-lightweight-face-detection-rfb-320.xml",
     "flame" : "remote-portrait/models_ir/flame/flame.xml",
     "flame_texture" : "remote-portrait/models_ir/flametex/flametex.xml",
     "flame_encoder" : "remote-portrait/models_ir/encoder_flame/E_flame.xml",
@@ -20,7 +21,9 @@
         "cam" : 3,
         "light" : 27
     },
+
     "input_image_size" : 224,
-    "visualizer_size" : [800, 600],
+    "visualizer_size" : [1000, 700],
+    "use_tex" : true,
     "no_show" : false
 }

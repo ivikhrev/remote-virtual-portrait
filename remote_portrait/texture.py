@@ -94,13 +94,17 @@ class Texture:
         face_image = face_image[np.newaxis].transpose(0,3,1,2)
         self.uv_face_eye_mask = cv2.normalize(self.uv_face_eye_mask, None, alpha=0,
             beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-
-        normals = Texture.normals(verts[0], self.templ_faces)
+        # cv2.imshow("self.uv_face_eye_mask", cv2.cvtColor(np.float32(self.uv_face_eye_mask.transpose(0, 2, 3, 1)[0]), cv2.COLOR_RGB2BGR))
+        normals = Texture.normals(verts[0], self.templ_faces[0])
         uv_detail_normals = self.displacement2normal(uv_z, verts, normals, self.uv_face_eye_mask,
             self.templ_faces, self.templ_uvcoords, self.templ_uvfaces)
-        uv_shading = Texture.add_sh_light(uv_detail_normals, light)
+        # cv2.imshow("uv_detail_normals", cv2.cvtColor(np.float32(uv_detail_normals.transpose(0, 2, 3, 1)[0]), cv2.COLOR_RGB2BGR))
+        uv_shading = Texture.add_sh_light(np.float32(uv_detail_normals), light)
+        # cv2.imshow("albedo", cv2.cvtColor(albedo.transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR))
+        # cv2.imshow("uv_shading", cv2.cvtColor(uv_shading.transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR))
         uv_texture = np.multiply(albedo, np.float32(uv_shading))
-
+        # cv2.imshow("uv_texture", cv2.cvtColor(uv_texture.transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR))
+        # cv2.waitKey(0)
         uv_pverts = self.world2uv(trans_verts, self.templ_faces, self.templ_uvcoords, self.templ_uvfaces)
         uv_gt = F.grid_sample(torch.from_numpy(face_image), uv_pverts.permute(0,2,3,1)[:,:,:,:2], mode='bilinear')
 
@@ -109,7 +113,7 @@ class Texture:
             + np.multiply(uv_texture[:,:3,:,:], (1 - self.uv_face_eye_mask))
 
         vis_texture = cv2.cvtColor(uv_texture_gt.numpy().transpose(0, 2, 3, 1)[0], cv2.COLOR_RGB2BGR)
-        cv2.imshow("uv_texture", vis_texture)
+        # cv2.imshow("uv_texture", vis_texture)
 
         return vis_texture * 255, self.raw_uvcoords, self.templ_uvfaces
 
@@ -151,7 +155,7 @@ class Texture:
         uv_detail_normals = np.transpose(uv_detail_normals.reshape(
             [batch_size, uv_coarse_vertices.shape[2], uv_coarse_vertices.shape[3], 3]), (0,3,1,2))
         uv_detail_normals = np.multiply(uv_detail_normals, uv_face_eye_mask) + \
-            np.multiply(uv_coarse_normals.numpy(), (1 - uv_face_eye_mask))
+            np.multiply(np.float32(uv_coarse_normals.numpy()), (1 - uv_face_eye_mask))
         return uv_detail_normals
 
     @staticmethod
@@ -164,9 +168,9 @@ class Texture:
                                     (np.pi / 4) * 3 * (np.sqrt(5 / (12 * np.pi))),
                                     (np.pi / 4) * 3 * (np.sqrt(5 / (12 * np.pi))),
                                     (np.pi / 4) * (3 / 2) * (np.sqrt(5 / (12 * np.pi))),
-                                    (np.pi / 4) * (1 / 2) * (np.sqrt(5 / (4 * np.pi)))])
+                                    (np.pi / 4) * (1 / 2) * (np.sqrt(5 / (4 * np.pi)))], dtype="float32")
         sh = np.stack([
-            texture[:, 0] * 0.+1.,
+            texture[:, 0] * 0. + 1.,
             texture[:, 0],
             texture[:, 1],
             texture[:, 2],
@@ -199,7 +203,7 @@ class Texture:
         nonzero = ~np.isclose(normals, [0., 0., 0.])[:,1] # create row mask
         normals[nonzero] /= np.linalg.norm(normals, axis=1, keepdims=True)[nonzero]
 
-        return normals  #normals[~np.isnan(normals).any(axis=1)]
+        return normals
 
     @staticmethod
     def generate_triangles(h, w, margin_x=2, margin_y=5):

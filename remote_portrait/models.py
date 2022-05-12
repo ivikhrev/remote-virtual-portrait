@@ -48,7 +48,7 @@ class Model(ABC):
 class SFD(Model):
     def __init__(self, core, model_path, device, conf_t=0.5, iou_t=0.5):
         super().__init__(core, model_path, device, log_info=False, compile_model=False)
-        self.model.reshape((1,3,-1,-1))
+        self.model.reshape((1,3,-1,-1))  # reshape for dynamic shapes
         log_model_info(self.model)
         log.info(f"Loading model {model_path} to the {device} device")
         self.compiled_model = core.compile_model(self.model, device)
@@ -141,7 +141,6 @@ class UltraLightFace(Model):
     def preprocess(self, image):
         self.original_shape = image.shape
         resized_image = resize_image(image, (self.w, self.h))
-        self.resized_shape = resized_image.shape
         resized_image = resized_image.transpose((2, 0, 1))  # HWC->CHW
         resized_image = resized_image.reshape((1, self.c, self.h, self.w))
         return  {self.image_blob_name : resized_image}
@@ -182,6 +181,27 @@ class UltraLightFace(Model):
             detection.xmax = min(int(detection.xmax), size[1])
             detection.ymax = min(int(detection.ymax), size[0])
         return detections
+
+
+class HeadPoseEstimation(Model):
+    def __init__(self, core, model_path, device):
+        super().__init__(core, model_path, device)
+        self.n, self.c, self.h, self.w = self.model.input().get_shape()
+        self.image_blob_name = self.input_names[0]
+
+    def preprocess(self, image):
+        self.original_shape = image.shape
+        resized_image = resize_image(image, (self.w, self.h))
+        resized_image = resized_image.transpose((2, 0, 1))  # HWC->CHW
+        resized_image = resized_image.reshape((1, self.c, self.h, self.w))
+        return  {self.image_blob_name : resized_image}
+
+    def postrocess(self, output_dict):
+        return {
+            "yaw" : output_dict["angle_r_fc"][0][0],
+            "pitch": output_dict["angle_p_fc"][0][0],
+            "roll": output_dict["angle_y_fc"][0][0],
+        }
 
 
 class FlameEncoder(Model):
