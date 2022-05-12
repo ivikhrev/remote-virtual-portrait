@@ -10,6 +10,7 @@ import openvino.runtime as ov
 import numpy as np
 from pytorch3d import io
 
+
 log = logging.getLogger('Global log')
 log_handler = logging.StreamHandler()
 log.addHandler(log_handler)
@@ -45,7 +46,6 @@ def main():
     core = ov.Core()
     face_detector = models.SFD(core, config.properties["face_detector"], device)
     fast_face_detector = models.UltraLightFace(core, config.properties["fast_face_detector"], device)
-    #head_pose_estimator = models.HeadPoseEstimation(core, config.properties["head_pose"], device)
     flame_encoder = models.FlameEncoder(core, config.properties["flame_encoder"], device)
     detail_encoder = models.DetailEncoder(core, config.properties["details_encoder"], device)
     detail_decoder = models.DetailDecoder(core,config.properties["details_decoder"], device)
@@ -75,7 +75,7 @@ def main():
                 (int(w/3), int(4/5 *h)), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0))
 
         cv2.imshow("face", img)
-        key = cv2.waitKey(delay)
+        key = 27
         if key in {ord('q'), ord('Q'), 27}:
             break
 

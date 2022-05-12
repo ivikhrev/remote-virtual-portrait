@@ -29,7 +29,7 @@ def adjust_rect(xmin, ymin, xmax, ymax, coeffx=0.1, coeffy=0.1):
     h , w =  ymax - ymin, xmax - xmin
     dx = int(w * coeffx)
     dy = int(h * coeffy)
-    return (xmin - dx , ymin), (xmax + dx , ymax + dy)
+    return (xmin - dx , ymin - dy // 2), (xmax + dx , ymax + dy)
 
 
 def square_crop_resize(img, bottom_left_point, top_right_point, target_size):
